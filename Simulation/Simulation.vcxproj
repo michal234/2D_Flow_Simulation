@@ -157,12 +157,14 @@
     <ClCompile Include="BinaryMap.cpp" />
     <ClCompile Include="Cell.cpp" />
     <ClCompile Include="Simulation.cpp" />
+    <ClCompile Include="Solver.cpp" />
     <ClCompile Include="UserInterface.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BinaryMap.h" />
     <ClInclude Include="Cell.h" />
     <ClInclude Include="Headers.h" />
+    <ClInclude Include="Solver.h" />
     <ClInclude Include="UserInterface.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

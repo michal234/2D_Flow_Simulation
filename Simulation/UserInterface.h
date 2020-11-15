@@ -3,6 +3,7 @@
 #include "Headers.h"
 #include "BinaryMap.h"
 #include "Cell.h"
+#include "Solver.h"
 
 using namespace std;
 
@@ -10,12 +11,12 @@ class UserInterface
 {
 	private:
 		BinaryMap bm;
-		vector<vector<Cell>> CellGrid;
+		Solver solver;
 
 		void ReadImage();
 		void ShowImage();
 		void CloseInterface();
-		void InitializeCellularAutomata();
+		void SolveSimulation();
 
 	public:
 		UserInterface();
