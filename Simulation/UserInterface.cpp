@@ -12,12 +12,12 @@ void UserInterface::ShowInterface()
 	cout << "Wybierz opcje:\n";
 	cout << "1 - wczytaj obraz\n";
 	cout << "2 - wyswietl obraz\n";
-	cout << "3 - solver\n";
+	cout << "3 - otworz solver\n";
 	cout << "4 - zakoncz dzialanie programu\n";
 	cout << ">>";
 }
 
-bool UserInterface::ChoiceService(int choice)
+int UserInterface::ChooseService(int choice)
 {
 	switch (choice)
 	{
@@ -28,15 +28,53 @@ bool UserInterface::ChoiceService(int choice)
 			ShowImage();
 			break;
 		case 3:
-			SolveSimulation();
-			break;
+			if (bm.IsEmpty())
+			{
+				cout << "Nie wczytano obrazu!\n";
+				break;
+			}
+			OpenSolver();
+			return 2;
 		case 4:
 			CloseInterface();
-			return false;
+			return 0;
 		default:
 			break;
 	}
-	return true;
+	return 1;
+}
+
+void UserInterface::ShowSolverInterface()
+{
+	cout << "SOLVER\n";
+	cout << "Wybierz opcje:\n";
+	cout << "1 - inicjalizacja sieci automatow komorkowych\n";
+	cout << "2 - warunki brzegowe\n";
+	cout << "3 - obliczenie symualcji\n";
+	cout << "4 - zamknij solver\n";
+	cout << ">>";
+}
+
+int UserInterface::ChooseSolverService(int choice)
+{
+	switch (choice)
+	{
+		case 1:
+			SolverInitialization();
+			break;
+		case 2:
+		
+			break;
+		case 3:
+			SolverSimulation();
+			break;
+		case 4:
+			CloseSolver();
+			return 0;
+		default:
+			break;
+	}
+	return 1;
 }
 
 void UserInterface::ReadImage()
@@ -64,7 +102,31 @@ void UserInterface::CloseInterface()
 	cout << "Interfejs zostal zamkniety\n";
 }
 
-void UserInterface::SolveSimulation()
+void UserInterface::OpenSolver()
 {
-	solver = Solver(bm);
+	solver = Solver();
+	cout << "Solver zostal otwarty pomyslnie\n";
+}
+
+void UserInterface::SolverInitialization()
+{
+	solver.CellGridInitialization(bm);
+	cout << "Pomyslnie zainicjalizowano siatke automatow komorkowych\n";
+}
+
+void UserInterface::SolverSimulation()
+{
+	if (!solver.GetInitialized())
+	{
+		cout << "Siatka niezainicjalizowana!\n";
+		return;
+	}
+	//tu robimy symulacjê
+	cout << "Symulacja\n";
+
+}
+
+void UserInterface::CloseSolver()
+{
+	cout << "Solver zostal zamkniety\n";
 }

@@ -9,11 +9,13 @@ using namespace std;
 class Solver
 {
 	private:
+		bool initialized;
 		vector<vector<Cell>> CellGrid;
 
 
 	public:
 		Solver();
-		Solver(BinaryMap bm);
+		bool GetInitialized();
+		void CellGridInitialization(BinaryMap bm);
 };
 

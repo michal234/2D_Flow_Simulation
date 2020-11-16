@@ -16,11 +16,16 @@ class UserInterface
 		void ReadImage();
 		void ShowImage();
 		void CloseInterface();
-		void SolveSimulation();
+		void OpenSolver();
+		void SolverInitialization();
+		void SolverSimulation();
+		void CloseSolver();
 
 	public:
 		UserInterface();
 		void ShowInterface();
-		bool ChoiceService(int choice);
+		void ShowSolverInterface();
+		int ChooseService(int choice);
+		int ChooseSolverService(int choice);
 };
 

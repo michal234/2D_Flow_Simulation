@@ -1,11 +1,14 @@
 #include "Cell.h"
 
-Cell::Cell(int state)
+Cell::Cell()
 {
-	State = state;
+
 }
 
-int Cell::GetState()
+Cell::Cell(bool fluid, bool boundary, int x, int y)
 {
-	return State;
+	this->fluid = fluid;
+	this->boundary = boundary;
+	this->x = x;
+	this->y = y;
 }

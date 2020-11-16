@@ -2,10 +2,15 @@
 
 Solver::Solver()
 {
-
+	initialized = false;
 }
 
-Solver::Solver(BinaryMap bm)
+bool Solver::GetInitialized()
+{
+	return initialized;
+}
+
+void Solver::CellGridInitialization(BinaryMap bm)
 {
 	int rows = bm.GetRows();
 	int cols = bm.GetCols();
@@ -15,19 +20,18 @@ Solver::Solver(BinaryMap bm)
 		for (int j = 0; j < cols; j++)
 		{
 			int element = bm.GetElement(i, j);
+			bool fluid = true;
+			bool boundary = false;
 			if (element == 0)	//solid
-			{
-				Cell cell(0);
-				vc.push_back(cell);
-			}
-			if (element == 255)	//fluid
-			{
-				Cell cell(1);
-				vc.push_back(cell);
-			}
+				fluid = false;
+			if( i==0 || i == rows-1 || j ==0 || j==cols-1 )
+				boundary = true;
+			Cell cell(fluid, boundary, i, j);
+			vc.push_back(cell);
+			
 		}
 		CellGrid.push_back(vc);
 	}
 
-	cout << "Pomyslnie zainicjalizowano siatke automatow komorkowych\n";
+	initialized = true;
 }
