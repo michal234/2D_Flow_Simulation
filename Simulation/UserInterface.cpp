@@ -46,11 +46,11 @@ int UserInterface::ChooseService(int choice)
 
 void UserInterface::ShowSolverInterface()
 {
-	cout << "SOLVER\n";
+	cout << "\nSOLVER\n";
 	cout << "Wybierz opcje:\n";
 	cout << "1 - inicjalizacja sieci automatow komorkowych\n";
 	cout << "2 - warunki brzegowe\n";
-	cout << "3 - obliczenie symualcji\n";
+	cout << "3 - obliczenie symulacji\n";
 	cout << "4 - zamknij solver\n";
 	cout << ">>";
 }
@@ -111,7 +111,7 @@ void UserInterface::OpenSolver()
 void UserInterface::SolverInitialization()
 {
 	solver.CellGridInitialization(bm);
-	cout << "Pomyslnie zainicjalizowano siatke automatow komorkowych\n";
+	//cout << "Pomyslnie zainicjalizowano siatke automatow komorkowych\n";
 }
 
 void UserInterface::SolverSimulation()
@@ -122,7 +122,7 @@ void UserInterface::SolverSimulation()
 		return;
 	}
 	//tu robimy symulacjê
-	cout << "Symulacja\n";
+	solver.Simulate();
 
 }
 

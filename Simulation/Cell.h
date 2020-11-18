@@ -15,9 +15,17 @@ class Cell
 		int y;	//Y-coordinate of the cell
 
 		map<string, Cell> neighbours;	//neighbours of the cell
+		int typeOfNeighbourhood;
 
 	public:
 		Cell();
+		Cell(bool fluid);	//for usage of setting neighbours in solver
 		Cell(bool fluid, bool boundary, int x, int y);
+		bool GetFluid();
+		bool GetBoundary();
+		int GetX();
+		int GetY();
+		void SetNeighbours(map<string, Cell> neighbours);
+		void SetTypeOfNeighbourhood(int type);
 };
 
