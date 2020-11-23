@@ -91,8 +91,10 @@ void Solver::SetNeighbours()
 
 					int type = TypeOfNeighbourhood(top, right, bottom, left);
 
+					neighbours.insert({ "Top", top });
 					neighbours.insert({ "Right", right });
 					neighbours.insert({ "Bottom", bottom });
+					neighbours.insert({ "Left", left });
 
 					cell.SetNeighbours(neighbours);
 					cell.SetTypeOfNeighbourhood(type);
@@ -106,6 +108,8 @@ void Solver::SetNeighbours()
 
 					int type = TypeOfNeighbourhood(top, right, bottom, left);
 
+					neighbours.insert({ "Top", top });
+					neighbours.insert({ "Right", right });
 					neighbours.insert({ "Bottom", bottom });
 					neighbours.insert({ "Left", left });
 
@@ -121,6 +125,7 @@ void Solver::SetNeighbours()
 
 					int type = TypeOfNeighbourhood(top, right, bottom, left);
 
+					neighbours.insert({ "Top", top });
 					neighbours.insert({ "Right", right });
 					neighbours.insert({ "Bottom", bottom });
 					neighbours.insert({ "Left", left });
@@ -142,6 +147,8 @@ void Solver::SetNeighbours()
 
 					neighbours.insert({ "Top", top });
 					neighbours.insert({ "Right", right });
+					neighbours.insert({ "Bottom", bottom });
+					neighbours.insert({ "Left", left });
 
 					cell.SetNeighbours(neighbours);
 					cell.SetTypeOfNeighbourhood(type);
@@ -156,6 +163,8 @@ void Solver::SetNeighbours()
 					int type = TypeOfNeighbourhood(top, right, bottom, left);
 
 					neighbours.insert({ "Top", top });
+					neighbours.insert({ "Right", right });
+					neighbours.insert({ "Bottom", bottom });
 					neighbours.insert({ "Left", left });
 
 					cell.SetNeighbours(neighbours);
@@ -172,6 +181,7 @@ void Solver::SetNeighbours()
 
 					neighbours.insert({ "Top", top });
 					neighbours.insert({ "Right", right });
+					neighbours.insert({ "Bottom", bottom });
 					neighbours.insert({ "Left", left });
 
 					cell.SetNeighbours(neighbours);
@@ -190,6 +200,7 @@ void Solver::SetNeighbours()
 				neighbours.insert({ "Top", top });
 				neighbours.insert({ "Right", right });
 				neighbours.insert({ "Bottom", bottom });
+				neighbours.insert({ "Left", left });
 
 				cell.SetNeighbours(neighbours);
 				cell.SetTypeOfNeighbourhood(type);
@@ -204,6 +215,7 @@ void Solver::SetNeighbours()
 				int type = TypeOfNeighbourhood(top, right, bottom, left);
 
 				neighbours.insert({ "Top", top });
+				neighbours.insert({ "Right", right });
 				neighbours.insert({ "Bottom", bottom });
 				neighbours.insert({ "Left", left });
 
