@@ -19,6 +19,7 @@ class UserInterface
 		void OpenSolver();
 		void SolverInitialization();
 		void SolverSimulation();
+		void SetBoundaryConditions();
 		void CloseSolver();
 
 	public:

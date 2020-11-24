@@ -63,7 +63,7 @@ int UserInterface::ChooseSolverService(int choice)
 			SolverInitialization();
 			break;
 		case 2:
-		
+			SetBoundaryConditions();
 			break;
 		case 3:
 			SolverSimulation();
@@ -114,11 +114,29 @@ void UserInterface::SolverInitialization()
 	//cout << "Pomyslnie zainicjalizowano siatke automatow komorkowych\n";
 }
 
+void UserInterface::SetBoundaryConditions()
+{
+	if (!solver.GetInitialized())
+	{
+		cout << "Siatka niezainicjalizowana!\n";
+		return;
+	}
+	double v = 0.0;
+	cout << "Wprowadz predkosc plynu na wlocie do ukladu (lewa strona): ";
+	cin >> v;
+	solver.SetBoundaryConditions(v);
+}
+
 void UserInterface::SolverSimulation()
 {
 	if (!solver.GetInitialized())
 	{
 		cout << "Siatka niezainicjalizowana!\n";
+		return;
+	}
+	if (!solver.GetBoudaryConditions())
+	{
+		cout << "Warunki brzegowe nie zostaly ustalone!\n";
 		return;
 	}
 	//tu robimy symulacjê

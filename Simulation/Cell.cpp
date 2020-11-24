@@ -9,6 +9,8 @@ Cell::Cell()
 	output_top = output_right = output_bottom = output_left = 0.0;
 	output_top_next = output_right_next = output_bottom_next = output_left_next = 0.0;
 	output_total = output_total_next = 0.0;
+
+	source = false;
 }
 
 Cell::Cell(bool fluid)
@@ -34,6 +36,18 @@ bool Cell::GetBoundary()
 	return boundary;
 }
 
+bool Cell::GetSource()
+{
+	return source;
+}
+
+bool Cell::GetBalance()
+{
+	if( abs(input_total - output_total) < 1e-5 )
+		return true;
+	return false;
+}
+
 int Cell::GetX()
 {
 	return x;
@@ -44,7 +58,12 @@ int Cell::GetY()
 	return y;
 }
 
-void Cell::SetNeighbours(map<string, Cell> neighbours)
+void Cell::SetSource()
+{
+	source = true;
+}
+
+void Cell::SetNeighbours(map<string, Cell*> neighbours)
 {
 	this->neighbours = neighbours;
 }
@@ -59,8 +78,7 @@ void Cell::FluidFlow()
 	//calculate direction of output
 	double xd = input_left - input_right;
 	double yd = input_bottom - input_top;
-	input_total = input_top + input_right + input_bottom + input_left;
-	fluid_amount = input_total;
+	
 
 	if (abs(xd) < 1e-5 && abs(yd) < 1e-5)
 	{
@@ -367,22 +385,22 @@ void Cell::FlowToNeighbours(double xd, double yd, double x_flow, double y_flow)
 {
 	if (xd > 0)		//flow to right
 	{
-		neighbours["Right"].SetLeftInput(x_flow);
+		neighbours["Right"]->SetLeftInput(x_flow);
 		output_right_next += x_flow;
 	}
 	else	//flow to left
 	{
-		neighbours["Left"].SetRightInput(x_flow);
+		neighbours["Left"]->SetRightInput(x_flow);
 		output_left_next += x_flow;
 	}
 	if (yd > 0)	//flow to top
 	{
-		neighbours["Top"].SetBottomInput(y_flow);
+		neighbours["Top"]->SetBottomInput(y_flow);
 		output_top_next += y_flow;
 	}
 	else	//flow to bottom
 	{
-		neighbours["Bottom"].SetTopInput(y_flow);
+		neighbours["Bottom"]->SetTopInput(y_flow);
 		output_bottom_next += y_flow;
 	}
 	output_total_next = output_bottom_next + output_left_next + output_right_next + output_top_next;
@@ -390,10 +408,10 @@ void Cell::FlowToNeighbours(double xd, double yd, double x_flow, double y_flow)
 
 void Cell::FlowToNeighbours2(double top_flow, double right_flow, double bottom_flow, double left_flow)
 {
-	neighbours["Right"].SetLeftInput(right_flow);
-	neighbours["Bottom"].SetTopInput(bottom_flow);
-	neighbours["Left"].SetRightInput(left_flow);
-	neighbours["Top"].SetBottomInput(top_flow);
+	neighbours["Right"]->SetLeftInput(right_flow);
+	neighbours["Bottom"]->SetTopInput(bottom_flow);
+	neighbours["Left"]->SetRightInput(left_flow);
+	neighbours["Top"]->SetBottomInput(top_flow);
 	output_right_next += right_flow;
 	output_bottom_next += bottom_flow;
 	output_left_next += left_flow;
@@ -426,6 +444,9 @@ void Cell::Update()
 	input_right = input_right_next;
 	input_bottom = input_bottom_next;
 	input_left = input_left_next;
+
+	input_total = input_top + input_right + input_bottom + input_left;
+	fluid_amount = input_total;
 
 	output_top = output_top_next;
 	output_right = output_right_next;

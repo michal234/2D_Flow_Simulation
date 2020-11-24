@@ -8,13 +8,13 @@ class Cell
 {
 	private:
 		bool fluid;		//if cell is fluid it's true
-		bool wall;		//if cell is fluid and lays next to the solid it's true
+		bool source;	//if cell is a boundary condition it is true
 		bool boundary;	//if cell lays on X=0 or X=N-1 or Y=0 or Y=M-1 it's true
 
 		int x;	//X-coordinate of the cell
 		int y;	//Y-coordinate of the cell
 
-		map<string, &Cell> neighbours;	//neighbours of the cell
+		map<string, Cell*> neighbours;	//neighbours of the cell
 		int typeOfNeighbourhood;
 
 		double fluid_amount;	//amount of fluid in the cell (= total_input)
@@ -60,10 +60,13 @@ class Cell
 		Cell(bool fluid, bool boundary, int x, int y);
 		bool GetFluid();
 		bool GetBoundary();
+		bool GetSource();
+		bool GetBalance();
 		int GetX();
 		int GetY();
+		void SetSource();
 
-		void SetNeighbours(map<string, Cell> neighbours);
+		void SetNeighbours(map<string, Cell*> neighbours);
 		void SetTypeOfNeighbourhood(int type);
 
 		void FluidFlow();
