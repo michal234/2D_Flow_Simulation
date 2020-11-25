@@ -62,11 +62,13 @@ class Cell
 		bool GetBoundary();
 		bool GetSource();
 		bool GetBalance();
+		double GetFluidAmount();
 		int GetX();
 		int GetY();
 		void SetSource();
 
-		void SetNeighbours(map<string, Cell*> neighbours);
+		//void SetNeighbours(map<string, Cell*> neighbours);
+		void SetNeighbours(Cell* top, Cell* right, Cell* bottom, Cell* left);
 		void SetTypeOfNeighbourhood(int type);
 
 		void FluidFlow();

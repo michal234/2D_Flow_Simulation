@@ -4,6 +4,9 @@ Solver::Solver()
 {
 	initialized = false;
 	boundaryConditions = false;
+	cellGridCols = 0;
+	cellGridRows = 0;
+	v_start = 0.0;
 }
 
 bool Solver::GetInitialized()
@@ -24,7 +27,7 @@ void Solver::CellGridInitialization(BinaryMap bm)
 	cellGridCols = bm.GetCols();
 	for (int i = 0; i < cellGridRows; i++)
 	{
-		vector<Cell> vc;
+		//vector<Cell*> vc = vector<Cell*>();
 		for (int j = 0; j < cellGridCols; j++)
 		{
 			int element = bm.GetElement(i, j);
@@ -37,13 +40,23 @@ void Solver::CellGridInitialization(BinaryMap bm)
 				boundary = true;
 
 			Cell cell(fluid, boundary, i, j);
-			vc.push_back(cell);
+			//vc.push_back(&cell);
 
-			if( fluid )
-				FluidCells.push_back(cell);
+			CellGrid.push_back(cell);	
 			
 		}
-		CellGrid.push_back(vc);
+		//CellGrid.push_back(vc);
+	}
+
+	for (int i = 0; i < cellGridRows; i++)
+	{
+		for (int j = 0; j < cellGridCols; j++)
+		{
+			if (CellGrid[i * cellGridCols + j].GetFluid())
+			{
+				FluidCells.push_back(&CellGrid[i*cellGridCols+j]);
+			}
+		}
 	}
 
 	initialized = true;
@@ -57,12 +70,20 @@ void Solver::SetBoundaryConditions(double v)
 
 	for (int i = 0; i < FluidCells.size(); i++)
 	{
-		if (FluidCells[i].GetY() == 0 && FluidCells[i].GetFluid())
+		if (FluidCells[i]->GetY() == 0 && FluidCells[i]->GetFluid())
 		{
-			FluidCells[i].SetLeftInput(v);
-			FluidCells[i].SetSource();
+			FluidCells[i]->SetLeftInput(v);
+			FluidCells[i]->SetSource();
 		}
 	}
+	/*for (int i = 0; i < cellGridRows; i++)
+	{
+		if (CellGrid[i][0]->GetFluid())
+		{
+			CellGrid[i][0]->SetLeftInput(v);
+			CellGrid[i][0]->SetSource();
+		}
+	}*/
 
 	boundaryConditions = true;
 	v_start = v;
@@ -82,14 +103,18 @@ void Solver::Simulate()
 		unbalancedCells = 0;
 		for (int i = 0; i < FluidCells.size(); i++)
 		{
-			if( !FluidCells[i].GetBalance() )
+			FluidCells[i]->FluidFlow();
+			if( !FluidCells[i]->GetBalance() )
 			{
-				FluidCells[i].FluidFlow();
+				
 				unbalancedCells++;
 			}
 		}
 		UpdateGrid();
-		cout << unbalancedCells << endl;
+
+		ShowStep();
+		cout << endl<< "Liczba komorek niezbilansowanych: " << unbalancedCells << endl;
+		cout << endl << endl;
 	}while(unbalancedCells != 0);
 }
 
@@ -99,29 +124,35 @@ void Solver::SetNeighbours()
 
 	for (int i = 0; i < FluidCells.size(); i++)
 	{
-		Cell* cell = &FluidCells[i];
+		Cell* cell = FluidCells[i];
 		int x = cell->GetX();
 		int y = cell->GetY();
-		map<string, Cell*> neighbours = map<string, Cell*>();
+		//map<string, Cell*> neighbours = map<string, Cell*>();
 
 		Cell outer = Cell(true);	//default fluid cell for cells on the boundary
 
 
 		if (!cell->GetBoundary())	//if the cell lays in the interior
 		{
-			Cell* top = &CellGrid[x-1][y];
-			Cell* right = &CellGrid[x][y+1];
-			Cell* bottom = &CellGrid[x+1][y];
-			Cell* left = &CellGrid[x][y-1];
+			/*Cell* top = CellGrid[x-1][y];
+			Cell* right = CellGrid[x][y+1];
+			Cell* bottom = CellGrid[x+1][y];
+			Cell* left = CellGrid[x][y-1];*/
+
+			Cell* top = &CellGrid[(x-1)*cellGridCols + y];
+			Cell* right = &CellGrid[x*cellGridCols + y + 1];
+			Cell* bottom = &CellGrid[(x+1)*cellGridCols + y];
+			Cell* left = &CellGrid[x*cellGridCols + y - 1];
 
 			int type = TypeOfNeighbourhood(*top, *right, *bottom, *left);
 
-			neighbours.insert({"Top", top});
+			/*neighbours.insert({"Top", top});
 			neighbours.insert({ "Right", right });
 			neighbours.insert({ "Bottom", bottom });
-			neighbours.insert({ "Left", left });
+			neighbours.insert({ "Left", left });*/
 
-			cell->SetNeighbours(neighbours);
+			//cell->SetNeighbours(neighbours);
+			cell->SetNeighbours(top, right, bottom, left);
 			cell->SetTypeOfNeighbourhood(type);
 		}
 		else	//if the cell lays on the boundary
@@ -130,53 +161,71 @@ void Solver::SetNeighbours()
 			{
 				if (y == 0)	//top left corner
 				{
+					/*Cell* top = &outer;
+					Cell* right = CellGrid[x][y + 1];
+					Cell* bottom = CellGrid[x + 1][y];
+					Cell* left = &outer;*/
+
 					Cell* top = &outer;
-					Cell* right = &CellGrid[x][y + 1];
-					Cell* bottom = &CellGrid[x + 1][y];
+					Cell* right = &CellGrid[x*cellGridCols + y + 1];
+					Cell* bottom = &CellGrid[(x+1)*cellGridCols + y];
 					Cell* left = &outer;
 
 					int type = TypeOfNeighbourhood(*top, *right, *bottom, *left);
 
-					neighbours.insert({ "Top", top });
+					/*neighbours.insert({ "Top", top });
 					neighbours.insert({ "Right", right });
 					neighbours.insert({ "Bottom", bottom });
-					neighbours.insert({ "Left", left });
+					neighbours.insert({ "Left", left });*/
 
-					cell->SetNeighbours(neighbours);
+					//cell->SetNeighbours(neighbours);
+					cell->SetNeighbours(top, right, bottom, left);
 					cell->SetTypeOfNeighbourhood(type);
 				}
 				else if (y == cellGridCols - 1)	//top right corner
 				{
+					/*Cell* top = &outer;
+					Cell* right = &outer;
+					Cell* bottom = CellGrid[x + 1][y];
+					Cell* left = CellGrid[x][y - 1];*/
+
 					Cell* top = &outer;
 					Cell* right = &outer;
-					Cell* bottom = &CellGrid[x + 1][y];
-					Cell* left = &CellGrid[x][y - 1];
+					Cell* bottom = &CellGrid[(x+1)*cellGridCols + y];
+					Cell* left = &CellGrid[x*cellGridCols + y - 1];
 
 					int type = TypeOfNeighbourhood(*top, *right, *bottom, *left);
 
-					neighbours.insert({ "Top", top });
+					/*neighbours.insert({ "Top", top });
 					neighbours.insert({ "Right", right });
 					neighbours.insert({ "Bottom", bottom });
-					neighbours.insert({ "Left", left });
+					neighbours.insert({ "Left", left });*/
 
-					cell->SetNeighbours(neighbours);
+					//cell->SetNeighbours(neighbours);
+					cell->SetNeighbours(top, right, bottom, left);
 					cell->SetTypeOfNeighbourhood(type);
 				}
 				else	//the rest of the top boundary
 				{
+					/*Cell* top = &outer;
+					Cell* right = CellGrid[x][y + 1];
+					Cell* bottom = CellGrid[x + 1][y];
+					Cell* left = CellGrid[x][y - 1];*/
+
 					Cell* top = &outer;
-					Cell* right = &CellGrid[x][y + 1];
-					Cell* bottom = &CellGrid[x + 1][y];
-					Cell* left = &CellGrid[x][y - 1];
+					Cell* right = &CellGrid[x*cellGridCols + y + 1];
+					Cell* bottom = &CellGrid[(x+1)*cellGridCols + y];
+					Cell* left = &CellGrid[x * cellGridCols + y - 1];
 
 					int type = TypeOfNeighbourhood(*top, *right, *bottom, *left);
 
-					neighbours.insert({ "Top", top });
+					/*neighbours.insert({ "Top", top });
 					neighbours.insert({ "Right", right });
 					neighbours.insert({ "Bottom", bottom });
-					neighbours.insert({ "Left", left });
+					neighbours.insert({ "Left", left });*/
 
-					cell->SetNeighbours(neighbours);
+					//cell->SetNeighbours(neighbours);
+					cell->SetNeighbours(top, right, bottom, left);
 					cell->SetTypeOfNeighbourhood(type);
 				}
 			}
@@ -184,92 +233,123 @@ void Solver::SetNeighbours()
 			{
 				if (y == 0)	//bottom left corner
 				{
-					Cell* top = &CellGrid[x - 1][y];
-					Cell* right = &CellGrid[x][y + 1];
+					/*Cell* top = CellGrid[x - 1][y];
+					Cell* right = CellGrid[x][y + 1];
+					Cell* bottom = &outer;
+					Cell* left = &outer;*/
+
+					Cell* top = &CellGrid[(x-1)*cellGridCols + y];
+					Cell* right = &CellGrid[x * cellGridCols + y + 1];
 					Cell* bottom = &outer;
 					Cell* left = &outer;
 
 					int type = TypeOfNeighbourhood(*top, *right, *bottom, *left);
 
-					neighbours.insert({ "Top", top });
+					/*neighbours.insert({ "Top", top });
 					neighbours.insert({ "Right", right });
 					neighbours.insert({ "Bottom", bottom });
-					neighbours.insert({ "Left", left });
+					neighbours.insert({ "Left", left });*/
 
-					cell->SetNeighbours(neighbours);
+					//cell->SetNeighbours(neighbours);
+					cell->SetNeighbours(top, right, bottom, left);
 					cell->SetTypeOfNeighbourhood(type);
 				}
 				else if (y == cellGridCols - 1)	//bottom right corner
 				{
-					Cell* top = &CellGrid[x - 1][y];
+					/*Cell* top = CellGrid[x - 1][y];
 					Cell* right = &outer;
 					Cell* bottom = &outer;
-					Cell* left = &CellGrid[x][y - 1];
+					Cell* left = CellGrid[x][y - 1];*/
+
+					Cell* top = &CellGrid[(x-1)*cellGridCols + y];
+					Cell* right = &outer;
+					Cell* bottom = &outer;
+					Cell* left = &CellGrid[x*cellGridCols + y - 1];
 
 					int type = TypeOfNeighbourhood(*top, *right, *bottom, *left);
 
-					neighbours.insert({ "Top", top });
+					/*neighbours.insert({ "Top", top });
 					neighbours.insert({ "Right", right });
 					neighbours.insert({ "Bottom", bottom });
-					neighbours.insert({ "Left", left });
+					neighbours.insert({ "Left", left });*/
 
-					cell->SetNeighbours(neighbours);
+					//cell->SetNeighbours(neighbours);
+					cell->SetNeighbours(top, right, bottom, left);
 					cell->SetTypeOfNeighbourhood(type);
 				}
 				else	//the rest of the bottom boundary
 				{
-					Cell* top = &CellGrid[x - 1][y];
-					Cell* right = &CellGrid[x][y + 1];
+					/*Cell* top = CellGrid[x - 1][y];
+					Cell* right = CellGrid[x][y + 1];
 					Cell* bottom = &outer;
-					Cell* left = &CellGrid[x][y - 1];
+					Cell* left = CellGrid[x][y - 1];*/
+
+					Cell* top = &CellGrid[(x-1)*cellGridCols + y];
+					Cell* right = &CellGrid[x*cellGridCols + y + 1];
+					Cell* bottom = &outer;
+					Cell* left = &CellGrid[x*cellGridCols + y - 1];
 
 					int type = TypeOfNeighbourhood(*top, *right, *bottom, *left);
 
-					neighbours.insert({ "Top", top });
+					/*neighbours.insert({ "Top", top });
 					neighbours.insert({ "Right", right });
 					neighbours.insert({ "Bottom", bottom });
-					neighbours.insert({ "Left", left });
+					neighbours.insert({ "Left", left });*/
 
-					cell->SetNeighbours(neighbours);
+					//cell->SetNeighbours(neighbours);
+					cell->SetNeighbours(top, right, bottom, left);
 					cell->SetTypeOfNeighbourhood(type);
 				}
 			}
 			else if (y == 0)	//left boundary (without corners)
 			{
-				Cell* top = &CellGrid[x - 1][y];
-				Cell* right = &CellGrid[x][y + 1];
-				Cell* bottom = &CellGrid[x + 1][y];
+				/*Cell* top = CellGrid[x - 1][y];
+				Cell* right = CellGrid[x][y + 1];
+				Cell* bottom = CellGrid[x + 1][y];
+				Cell* left = &outer;*/
+
+				Cell* top = &CellGrid[(x-1)*cellGridCols + y];
+				Cell* right = &CellGrid[x*cellGridCols + y + 1];
+				Cell* bottom = &CellGrid[(x+1)*cellGridCols + y];
 				Cell* left = &outer;
 
 				int type = TypeOfNeighbourhood(*top, *right, *bottom, *left);
 
-				neighbours.insert({ "Top", top });
+				/*neighbours.insert({ "Top", top });
 				neighbours.insert({ "Right", right });
 				neighbours.insert({ "Bottom", bottom });
-				neighbours.insert({ "Left", left });
+				neighbours.insert({ "Left", left });*/
 
-				cell->SetNeighbours(neighbours);
+				//cell->SetNeighbours(neighbours);
+				cell->SetNeighbours(top, right, bottom, left);
 				cell->SetTypeOfNeighbourhood(type);
 			}
 			else	//right boundary (without corners)
 			{
-				Cell* top = &CellGrid[x - 1][y];
+				/*Cell* top = CellGrid[x - 1][y];
 				Cell* right = &outer;
-				Cell* bottom = &CellGrid[x + 1][y];
-				Cell* left = &CellGrid[x][y - 1];
+				Cell* bottom = CellGrid[x + 1][y];
+				Cell* left = CellGrid[x][y - 1];*/
 
+				Cell* top = &CellGrid[(x-1)*cellGridCols + y];
+				Cell* right = &outer;
+				Cell* bottom = &CellGrid[(x+1)*cellGridCols + y];
+				Cell* left = &CellGrid[x*cellGridCols + y - 1];
+				
 				int type = TypeOfNeighbourhood(*top, *right, *bottom, *left);
 
-				neighbours.insert({ "Top", top });
+				/*neighbours.insert({ "Top", top });
 				neighbours.insert({ "Right", right });
 				neighbours.insert({ "Bottom", bottom });
-				neighbours.insert({ "Left", left });
+				neighbours.insert({ "Left", left });*/
 
-				cell->SetNeighbours(neighbours);
+				//cell->SetNeighbours(neighbours);
+				cell->SetNeighbours(top, right, bottom, left);
 				cell->SetTypeOfNeighbourhood(type);
 			}
 		}
 
+		//CellGrid[x*cellGridCols + y] = *cell;
 		//neighbours.clear();		//clear the map of neighbours in order to create place for the noighbours of the next cell
 	}
 
@@ -323,10 +403,25 @@ void Solver::UpdateGrid()
 
 	for (int i = 0; i < FluidCells.size(); i++)
 	{
-		FluidCells[i].Update();
-		if (FluidCells[i].GetSource())
-			FluidCells[i].SetLeftInput(v_start);
+		FluidCells[i]->Update();
+		if (FluidCells[i]->GetSource())
+			FluidCells[i]->SetLeftInput(v_start);
 	}
 
 	//cout << "Aktualizacja siatki zakonczona\n";
+}
+
+void Solver::ShowStep()
+{
+	for (int i = 0; i < cellGridRows; i++)
+	{
+		for (int j = 0; j < cellGridCols; j++)
+		{
+			if( CellGrid[i*cellGridCols+j].GetFluid() )
+				cout << CellGrid[i*cellGridCols+j].GetFluidAmount() << " ";
+			else
+				cout << "  ";
+		}
+		cout << endl;
+	}
 }

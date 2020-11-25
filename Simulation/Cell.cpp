@@ -10,12 +10,34 @@ Cell::Cell()
 	output_top_next = output_right_next = output_bottom_next = output_left_next = 0.0;
 	output_total = output_total_next = 0.0;
 
-	source = false;
+	fluid_amount = 0.0;
+
+	typeOfNeighbourhood = 0;
+
+	x = y = 0;
+
+	fluid = source = boundary = false;
 }
 
 Cell::Cell(bool fluid)
 {
 	this->fluid = fluid;
+
+	input_top = input_right = input_bottom = input_left = 0.0;
+	input_top_next = input_right_next = input_bottom_next = input_left_next = 0.0;
+	input_total = 0.0;
+
+	output_top = output_right = output_bottom = output_left = 0.0;
+	output_top_next = output_right_next = output_bottom_next = output_left_next = 0.0;
+	output_total = output_total_next = 0.0;
+
+	fluid_amount = 0.0;
+
+	typeOfNeighbourhood = 0;
+
+	x = y = 0;
+
+	source = boundary = false;
 }
 
 Cell::Cell(bool fluid, bool boundary, int x, int y)
@@ -24,6 +46,20 @@ Cell::Cell(bool fluid, bool boundary, int x, int y)
 	this->boundary = boundary;
 	this->x = x;
 	this->y = y;
+
+	input_top = input_right = input_bottom = input_left = 0.0;
+	input_top_next = input_right_next = input_bottom_next = input_left_next = 0.0;
+	input_total = 0.0;
+
+	output_top = output_right = output_bottom = output_left = 0.0;
+	output_top_next = output_right_next = output_bottom_next = output_left_next = 0.0;
+	output_total = output_total_next = 0.0;
+
+	fluid_amount = 0.0;
+
+	typeOfNeighbourhood = 0;
+
+	source = false;
 }
 
 bool Cell::GetFluid()
@@ -48,6 +84,11 @@ bool Cell::GetBalance()
 	return false;
 }
 
+double Cell::GetFluidAmount()
+{
+	return fluid_amount;
+}
+
 int Cell::GetX()
 {
 	return x;
@@ -63,9 +104,17 @@ void Cell::SetSource()
 	source = true;
 }
 
-void Cell::SetNeighbours(map<string, Cell*> neighbours)
+/*void Cell::SetNeighbours(map<string, Cell*> neighbours)
 {
 	this->neighbours = neighbours;
+}*/
+
+void Cell::SetNeighbours(Cell* top, Cell* right, Cell* bottom, Cell* left)
+{
+	this->neighbours.insert({ "Top", top });
+	this->neighbours.insert({ "Right", right });
+	this->neighbours.insert({ "Bottom", bottom });
+	this->neighbours.insert({ "Left", left });
 }
 
 void Cell::SetTypeOfNeighbourhood(int type)
@@ -79,6 +128,8 @@ void Cell::FluidFlow()
 	double xd = input_left - input_right;
 	double yd = input_bottom - input_top;
 	
+	//if( y == 1 )
+	//cout << x << " " << y << endl;
 
 	if (abs(xd) < 1e-5 && abs(yd) < 1e-5)
 	{
