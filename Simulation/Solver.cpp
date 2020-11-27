@@ -96,18 +96,20 @@ void Solver::SetBoundaryConditions(double v)
 void Solver::Simulate()
 {
 	SetNeighbours();
-	UpdateGrid();
+	//UpdateGrid();
 
 	int unbalancedCells = 0;
 
 	do
 	{
+		UpdateGrid();
 		unbalancedCells = 0;
 		for (int i = 0; i < FluidCells.size(); i++)
 		{
 			FluidCells[i]->FluidFlow();
 			if( !FluidCells[i]->GetBalance() )
 			{
+				//FluidCells[i]->FluidFlow();
 				unbalancedCells++;
 			}
 			/*if (slant)
@@ -234,7 +236,7 @@ void Solver::Simulate()
 				FluidCells[i]->SetOutputTotal(total);
 			}*/
 		}
-		UpdateGrid();
+		
 
 		ShowStep();
 		cout << endl<< "Liczba komorek niezbilansowanych: " << unbalancedCells << endl;
@@ -534,8 +536,8 @@ void Solver::ShowStep()
 			if( CellGrid[i*cellGridCols+j].GetFluid() )
 			//if( CellGrid[i][j].GetFluid() )
 				//cout << CellGrid[i][j].GetFluidAmount() << " ";
-				cout << CellGrid[i*cellGridCols+j].GetFluidAmount() << " ";
-				//printf("%.1f ", CellGrid[i * cellGridCols + j].GetFluidAmount() );
+				//cout << CellGrid[i*cellGridCols+j].GetFluidAmount() << " ";
+				printf("%.0f ", CellGrid[i * cellGridCols + j].GetFluidAmount() );
 			else
 				cout << "   ";
 		}
