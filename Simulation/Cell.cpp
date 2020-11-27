@@ -11,8 +11,10 @@ Cell::Cell()
 	output_total = output_total_next = 0.0;
 
 	fluid_amount = 0.0;
+	velocity = 0.0;
 
 	typeOfNeighbourhood = 0;
+	typeOfNeighbourhoodOnSlant = 0;
 
 	x = y = 0;
 
@@ -32,8 +34,10 @@ Cell::Cell(bool fluid)
 	output_total = output_total_next = 0.0;
 
 	fluid_amount = 0.0;
+	velocity = 0.0;
 
 	typeOfNeighbourhood = 0;
+	typeOfNeighbourhoodOnSlant = 0;
 
 	x = y = 0;
 
@@ -56,8 +60,10 @@ Cell::Cell(bool fluid, bool boundary, int x, int y)
 	output_total = output_total_next = 0.0;
 
 	fluid_amount = 0.0;
+	velocity = 0.0;
 
 	typeOfNeighbourhood = 0;
+	typeOfNeighbourhoodOnSlant = 0;
 
 	source = false;
 }
@@ -89,25 +95,10 @@ double Cell::GetFluidAmount()
 	return fluid_amount;
 }
 
-/*double Cell::GetInputTop()
+double Cell::GetVelocity()
 {
-	return input_top;
+	return velocity;
 }
-
-double Cell::GetInputRight()
-{
-	return input_right;
-}
-
-double Cell::GetInputBottom()
-{
-	return input_bottom;
-}
-
-double Cell::GetInputLeft()
-{
-	return input_left;
-}*/
 
 int Cell::GetX()
 {
@@ -123,11 +114,6 @@ void Cell::SetSource()
 {
 	source = true;
 }
-
-/*void Cell::SetNeighbours(map<string, Cell*> neighbours)
-{
-	this->neighbours = neighbours;
-}*/
 
 void Cell::SetNeighbours(Cell* top, Cell* right, Cell* bottom, Cell* left)
 {
@@ -155,11 +141,6 @@ void Cell::SetTypeOfNeighbourhoodOnSlant(int type)
 	this->typeOfNeighbourhoodOnSlant = type;
 }
 
-/*void Cell::SetOutputTotal(double out)
-{
-	output_total_next = out;
-}*/
-
 void Cell::FluidFlow()
 {
 	
@@ -167,9 +148,23 @@ void Cell::FluidFlow()
 	double x_direction = input_left - input_right;
 	double y_direction = input_bottom - input_top;
 
+	velocity = sqrt(x_direction * x_direction + y_direction * y_direction);
+
 	input_total = input_left + input_bottom + input_right + input_top;
 
-	if (abs(x_direction) < 1e-5 && abs(y_direction) < 1e-5)
+	if( abs(input_total) < 1e-5 )
+		return;
+
+	/*if (input_total < 0.0)
+	{
+		cout << x << " " << y << endl;
+	}
+	if (x == 18 && y == 6)
+	{
+		cout << x << " " << y << endl;
+	}*/
+
+	if (abs(x_direction) < 1e-5 && abs(y_direction) < 1e-5 )
 	{
 		UniformFlow();
 		return;
@@ -303,8 +298,8 @@ void Cell::FluidFlow()
 				a = abs_angle / 90;
 				if (angle > 0 && x_direction > 0 && y_direction > 0)
 				{
-					top_flow = input_total * y_direction / (x_direction + y_direction);
-					right_flow = input_total * x_direction / (x_direction + y_direction);
+					top_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					right_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 					FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 				}
 				else if (angle < 0 && x_direction < 0 && y_direction > 0)
@@ -444,8 +439,8 @@ void Cell::FluidFlow()
 				}
 				else if (angle < 0 && x_direction > 0 && y_direction < 0)
 				{
-					bottom_flow = input_total * y_direction / (x_direction + y_direction);
-					right_flow = input_total * x_direction / (x_direction + y_direction);
+					bottom_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					right_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 					FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 				}
 				else if (abs(x_direction) < 1e-5 && y_direction > 0)
@@ -512,8 +507,8 @@ void Cell::FluidFlow()
 				}
 				else if (angle > 0 && x_direction < 0 && y_direction < 0)
 				{
-					bottom_flow = input_total * y_direction / (x_direction + y_direction);
-					left_flow = input_total * x_direction / (x_direction + y_direction);
+					bottom_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					left_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 					FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 				}
 				else if (angle < 0 && x_direction > 0 && y_direction < 0)
@@ -579,8 +574,8 @@ void Cell::FluidFlow()
 				}
 				else if (angle < 0 && x_direction < 0 && y_direction > 0)
 				{
-					top_flow = input_total * y_direction / (x_direction + y_direction);
-					left_flow = input_total * x_direction / (x_direction + y_direction);
+					top_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					left_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 					FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 				}
 				else if (angle > 0 && x_direction < 0 && y_direction < 0)
@@ -646,8 +641,8 @@ void Cell::FluidFlow()
 				a = abs_angle / 90;
 				if (angle > 0 && x_direction > 0 && y_direction > 0)
 				{
-					top_flow = input_total * y_direction / (x_direction + y_direction);
-					right_flow = input_total * x_direction / (x_direction + y_direction);
+					top_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					right_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 					FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 				}
 				else if (angle < 0 && x_direction < 0 && y_direction > 0)
@@ -689,8 +684,8 @@ void Cell::FluidFlow()
 				}
 				else if (angle < 0 && x_direction > 0 && y_direction < 0)
 				{
-					bottom_flow = input_total * y_direction / (x_direction + y_direction);
-					right_flow = input_total * x_direction / (x_direction + y_direction);
+					bottom_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					right_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 					FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 				}
 				else if (abs(x_direction) < 1e-5 && y_direction > 0)
@@ -719,8 +714,8 @@ void Cell::FluidFlow()
 				a = abs_angle / 90;
 				if (angle > 0 && x_direction > 0 && y_direction > 0)
 				{
-					top_flow = input_total * y_direction / (x_direction + y_direction);
-					right_flow = input_total * x_direction / (x_direction + y_direction);
+					top_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					right_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 					FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 				}
 				else if (angle < 0 && x_direction < 0 && y_direction > 0)
@@ -744,8 +739,8 @@ void Cell::FluidFlow()
 				}
 				else if (angle > 0 && x_direction < 0 && y_direction < 0)
 				{
-					bottom_flow = input_total * y_direction / (x_direction + y_direction);
-					left_flow = input_total * x_direction / (x_direction + y_direction);
+					bottom_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					left_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 					FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 				}
 				else if (angle < 0 && x_direction > 0 && y_direction < 0)
@@ -793,14 +788,14 @@ void Cell::FluidFlow()
 				a = abs_angle / 90;
 				if (angle > 0 && x_direction > 0 && y_direction > 0)
 				{
-					top_flow = input_total * y_direction / (x_direction + y_direction);
-					right_flow = input_total * x_direction / (x_direction + y_direction);
+					top_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					right_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 					FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 				}
 				else if (angle < 0 && x_direction < 0 && y_direction > 0)
 				{
-					top_flow = input_total * y_direction / (x_direction + y_direction);
-					left_flow = input_total * x_direction / (x_direction + y_direction);
+					top_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					left_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 					FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 				}
 				else if (angle > 0 && x_direction < 0 && y_direction < 0)
@@ -903,14 +898,14 @@ void Cell::FluidFlow()
 				}
 				else if (angle > 0 && x_direction < 0 && y_direction < 0)
 				{
-					bottom_flow = input_total * y_direction / (x_direction + y_direction);
-					left_flow = input_total * x_direction / (x_direction + y_direction);
+					bottom_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					left_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 					FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 				}
 				else if (angle < 0 && x_direction > 0 && y_direction < 0)
 				{
-					bottom_flow = input_total * y_direction / (x_direction + y_direction);
-					right_flow = input_total * x_direction / (x_direction + y_direction);
+					bottom_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					right_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 					FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 				}
 				else if (abs(x_direction) < 1e-5 && y_direction > 0)
@@ -957,8 +952,8 @@ void Cell::FluidFlow()
 				}
 				else if (angle < 0 && x_direction < 0 && y_direction > 0)
 				{
-					top_flow = input_total * y_direction / (x_direction + y_direction);
-					left_flow = input_total * x_direction / (x_direction + y_direction);
+					top_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					left_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 					FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 				}
 				else if (angle > 0 && x_direction < 0 && y_direction < 0)
@@ -981,8 +976,8 @@ void Cell::FluidFlow()
 				}
 				else if (angle < 0 && x_direction > 0 && y_direction < 0)
 				{
-					bottom_flow = input_total * y_direction / (x_direction + y_direction);
-					right_flow = input_total * x_direction / (x_direction + y_direction);
+					bottom_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					right_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 					FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 				}
 				else if (abs(x_direction) < 1e-5 && y_direction > 0)
@@ -1029,14 +1024,14 @@ void Cell::FluidFlow()
 				}
 				else if (angle < 0 && x_direction < 0 && y_direction > 0)
 				{
-					top_flow = input_total * y_direction / (x_direction + y_direction);
-					left_flow = input_total * x_direction / (x_direction + y_direction);
+					top_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					left_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 					FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 				}
 				else if (angle > 0 && x_direction < 0 && y_direction < 0)
 				{
-					bottom_flow = input_total * y_direction / (x_direction + y_direction);
-					left_flow = input_total * x_direction / (x_direction + y_direction);
+					bottom_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					left_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 					FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 				}
 				else if (angle < 0 && x_direction > 0 && y_direction < 0)
@@ -1084,8 +1079,8 @@ void Cell::FluidFlow()
 				a = abs_angle / 90;
 				if (angle > 0 && x_direction > 0 && y_direction > 0)
 				{
-					top_flow = input_total * y_direction / (x_direction + y_direction);
-					right_flow = input_total * x_direction / (x_direction + y_direction);
+					top_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					right_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 					FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 				}
 				else if (angle < 0 && x_direction < 0 && y_direction > 0)
@@ -1109,14 +1104,14 @@ void Cell::FluidFlow()
 				}
 				else if (angle > 0 && x_direction < 0 && y_direction < 0)
 				{
-					bottom_flow = input_total * y_direction / (x_direction + y_direction);
-					left_flow = input_total * x_direction / (x_direction + y_direction);
+					bottom_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					left_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 					FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 				}
 				else if (angle < 0 && x_direction > 0 && y_direction < 0)
 				{
-					bottom_flow = input_total * y_direction / (x_direction + y_direction);
-					right_flow = input_total * x_direction / (x_direction + y_direction);
+					bottom_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					right_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 					FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 				}
 				else if (abs(x_direction) < 1e-5 && y_direction > 0)
@@ -1163,20 +1158,20 @@ void Cell::FluidFlow()
 				}
 				else if (angle < 0 && x_direction < 0 && y_direction > 0)
 				{
-					top_flow = input_total * y_direction / (x_direction + y_direction);
-					left_flow = input_total * x_direction / (x_direction + y_direction);
+					top_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					left_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 					FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 				}
 				else if (angle > 0 && x_direction < 0 && y_direction < 0)
 				{
-					bottom_flow = input_total * y_direction / (x_direction + y_direction);
-					left_flow = input_total * x_direction / (x_direction + y_direction);
+					bottom_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					left_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 					FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 				}
 				else if (angle < 0 && x_direction > 0 && y_direction < 0)
 				{
-					bottom_flow = input_total * y_direction / (x_direction + y_direction);
-					right_flow = input_total * x_direction / (x_direction + y_direction);
+					bottom_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					right_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 					FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 				}
 				else if (abs(x_direction) < 1e-5 && y_direction > 0)
@@ -1205,20 +1200,20 @@ void Cell::FluidFlow()
 				a = abs_angle / 90;
 				if (angle > 0 && x_direction > 0 && y_direction > 0)
 				{
-					top_flow = input_total * y_direction / (x_direction + y_direction);
-					right_flow = input_total * x_direction / (x_direction + y_direction);
+					top_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					right_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 					FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 				}
 				else if (angle < 0 && x_direction < 0 && y_direction > 0)
 				{
-					top_flow = input_total * y_direction / (x_direction + y_direction);
-					left_flow = input_total * x_direction / (x_direction + y_direction);
+					top_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					left_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 					FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 				}
 				else if (angle > 0 && x_direction < 0 && y_direction < 0)
 				{
-					bottom_flow = input_total * y_direction / (x_direction + y_direction);
-					left_flow = input_total * x_direction / (x_direction + y_direction);
+					bottom_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					left_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 					FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 				}
 				else if (angle < 0 && x_direction > 0 && y_direction < 0)
@@ -1266,14 +1261,14 @@ void Cell::FluidFlow()
 				a = abs_angle / 90;
 				if (angle > 0 && x_direction > 0 && y_direction > 0)
 				{
-					top_flow = input_total * y_direction / (x_direction + y_direction);
-					right_flow = input_total * x_direction / (x_direction + y_direction);
+					top_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					right_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 					FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 				}
 				else if (angle < 0 && x_direction < 0 && y_direction > 0)
 				{
-					top_flow = input_total * y_direction / (x_direction + y_direction);
-					left_flow = input_total * x_direction / (x_direction + y_direction);
+					top_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					left_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 					FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 				}
 				else if (angle > 0 && x_direction < 0 && y_direction < 0)
@@ -1296,8 +1291,8 @@ void Cell::FluidFlow()
 				}
 				else if (angle < 0 && x_direction > 0 && y_direction < 0)
 				{
-					bottom_flow = input_total * y_direction / (x_direction + y_direction);
-					right_flow = input_total * x_direction / (x_direction + y_direction);
+					bottom_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					right_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 					FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 				}
 				else if (abs(x_direction) < 1e-5 && y_direction > 0)
@@ -1326,26 +1321,26 @@ void Cell::FluidFlow()
 				a = abs_angle / 90;
 				if (angle > 0 && x_direction > 0 && y_direction > 0)
 				{
-					top_flow = input_total * y_direction / (x_direction + y_direction);
-					right_flow = input_total * x_direction / (x_direction + y_direction);
+					top_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					right_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 					FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 				}
 				else if (angle < 0 && x_direction < 0 && y_direction > 0)
 				{
-					top_flow = input_total * y_direction / (x_direction + y_direction);
-					left_flow = input_total * x_direction / (x_direction + y_direction);
+					top_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					left_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 					FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 				}
 				else if (angle > 0 && x_direction < 0 && y_direction < 0)
 				{
-					bottom_flow = input_total * y_direction / (x_direction + y_direction);
-					left_flow = input_total * x_direction / (x_direction + y_direction);
+					bottom_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					left_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 					FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 				}
 				else if (angle < 0 && x_direction > 0 && y_direction < 0)
 				{
-					bottom_flow = input_total * y_direction / (x_direction + y_direction);
-					right_flow = input_total * x_direction / (x_direction + y_direction);
+					bottom_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					right_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 					FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 				}
 				else if (abs(x_direction) < 1e-5 && y_direction > 0)
@@ -1376,77 +1371,77 @@ void Cell::FluidFlow()
 	{
 		case 1:
 			if( x_direction >= 0 )
-				right_flow = input_total * abs(x_direction) / (abs(x_direction) + (y_direction) );
+				right_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction) );
 			else
-				left_flow = input_total * abs(x_direction) / (abs(x_direction) + (y_direction));
-			bottom_flow = input_total * abs(y_direction) / (abs(x_direction) + (y_direction));
+				left_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
+			bottom_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
 			FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 			break;
 
 		case 2:
 			if (y_direction >= 0)
-				top_flow = input_total * abs(y_direction) / (abs(x_direction) + (y_direction));
+				top_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
 			else
-				bottom_flow = input_total * abs(y_direction) / (abs(x_direction) + (y_direction));
-			left_flow = input_total * abs(x_direction) / (abs(x_direction) + (y_direction));
+				bottom_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+			left_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 			FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 			break;
 
 		case 3:
 			if (x_direction >= 0)
-				right_flow = input_total * abs(x_direction) / (abs(x_direction) + (y_direction));
+				right_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 			else
-				left_flow = input_total * abs(x_direction) / (abs(x_direction) + (y_direction));
-			top_flow = input_total * abs(y_direction) / (abs(x_direction) + (y_direction));
+				left_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
+			top_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
 			FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 			break;
 
 		case 4:
 			if (y_direction >= 0)
-				top_flow = input_total * abs(y_direction) / (abs(x_direction) + (y_direction));
+				top_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
 			else
-				bottom_flow = input_total * abs(y_direction) / (abs(x_direction) + (y_direction));
-			right_flow = input_total * abs(x_direction) / (abs(x_direction) + (y_direction));
+				bottom_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+			right_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 			FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 			break;
 
 		case 5:
-			left_flow = input_total * abs(y_direction) / (abs(x_direction) + (y_direction));
-			bottom_flow = input_total * abs(x_direction) / (abs(x_direction) + (y_direction));
+			left_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+			bottom_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 			FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 			break;
 
 		case 6:
 			if (x_direction >= 0)
-				right_flow = input_total * abs(x_direction) / (abs(x_direction) + (y_direction));
+				right_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 			else
-				left_flow = input_total * abs(x_direction) / (abs(x_direction) + (y_direction));
+				left_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 			FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 			break;
 
 		case 7:
-			right_flow = input_total * abs(y_direction) / (abs(x_direction) + (y_direction));
-			bottom_flow = input_total * abs(x_direction) / (abs(x_direction) + (y_direction));
+			right_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+			bottom_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 			FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 			break;
 
 		case 8:
-			left_flow = input_total * abs(y_direction) / (abs(x_direction) + (y_direction));
-			top_flow = input_total * abs(x_direction) / (abs(x_direction) + (y_direction));
+			left_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+			top_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 			FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 			break;
 
 		case 9:
 			if (y_direction >= 0)
-				top_flow = input_total * abs(y_direction) / (abs(x_direction) + (y_direction));
+				top_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
 			else
-				bottom_flow = input_total * abs(y_direction) / (abs(x_direction) + (y_direction));
+				bottom_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
 			FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 			break;
 
 		case 10:
-			right_flow = input_total * abs(y_direction) / (abs(x_direction) + (y_direction));
-			top_flow = input_total * abs(x_direction) / (abs(x_direction) + (y_direction));
+			right_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+			top_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 			FlowToNeighbours2(top_flow, right_flow, bottom_flow, left_flow);
 			break;
 
@@ -1822,10 +1817,10 @@ void Cell::FlowToNeighbours2(double top_flow, double right_flow, double bottom_f
 	neighbours["Bottom"]->SetTopInput(bottom_flow);
 	neighbours["Left"]->SetRightInput(left_flow);
 	neighbours["Top"]->SetBottomInput(top_flow);
-	output_right_next += right_flow;
-	output_bottom_next += bottom_flow;
-	output_left_next += left_flow;
-	output_top_next += top_flow;
+	output_right_next = right_flow;
+	output_bottom_next = bottom_flow;
+	output_left_next = left_flow;
+	output_top_next = top_flow;
 	output_total_next += output_bottom_next + output_left_next + output_right_next + output_top_next;
 }
 
@@ -1853,10 +1848,10 @@ void Cell::FlowToNeighboursOnSlant(double top_flow, double right_flow, double bo
 			this->neighboursOnSlant["TopLeft"]->SetBottomInput(top_flow);
 			break;
 	}
-	output_right_next += right_flow;
-	output_bottom_next += bottom_flow;
-	output_left_next += left_flow;
-	output_top_next += top_flow;
+	output_right_next = right_flow;
+	output_bottom_next = bottom_flow;
+	output_left_next = left_flow;
+	output_top_next = top_flow;
 	output_total_next += output_bottom_next + output_left_next + output_right_next + output_top_next;
 }
 
@@ -1890,6 +1885,11 @@ void Cell::Update()
 	input_total = input_top + input_right + input_bottom + input_left;
 	fluid_amount = input_total;
 
+	/*if (fluid_amount < 0)
+	{
+		cout << x << " " << y << endl;
+	}*/
+
 	output_top = output_top_next;
 	output_right = output_right_next;
 	output_bottom = output_bottom_next;
@@ -1919,7 +1919,7 @@ int Cell::ChooseDirection(double x_direction, double y_direction)
 	if (x_direction < 0 && abs(y_direction) < 1e-5)	//left
 		return 7;
 	if (x_direction < 0 && y_direction > 0)		//top left
-		return 6;
+		return 8;
 
 	return 0;
 }

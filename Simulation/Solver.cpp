@@ -96,7 +96,7 @@ void Solver::SetBoundaryConditions(double v)
 void Solver::Simulate()
 {
 	SetNeighbours();
-	//UpdateGrid();
+	UpdateGrid();
 
 	int unbalancedCells = 0;
 
@@ -112,135 +112,12 @@ void Solver::Simulate()
 				//FluidCells[i]->FluidFlow();
 				unbalancedCells++;
 			}
-			/*if (slant)
-			{
-				double top = FluidCells[i]->GetInputTop();
-				double right = FluidCells[i]->GetInputRight();
-				double bottom = FluidCells[i]->GetInputBottom();
-				double left = FluidCells[i]->GetInputLeft();
-
-				double total = top + right + bottom + left;
-
-				int x = FluidCells[i]->GetX();
-				int y = FluidCells[i]->GetY();
-
-				double x_direction = left - right;
-				double y_direction = bottom - top;
-
-				double alpha = atan(y_direction / x_direction) * 180 / PI;
-
-				if (alpha > 0 && x_direction > 0 && y_direction > 0)	//move to top right
-				{
-					if (!CellGrid[(x - 1) * cellGridCols + y + 1].GetFluid())		//top right is solid
-					{
-						CellGrid[(x - 1) * cellGridCols + y].SetBottomInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)));
-						CellGrid[x * cellGridCols + y + 1].SetLeftInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)));
-					}
-					else
-					{
-						double angle_direction = alpha / 90;
-						if (angle_direction <= 0.5)		//move to top right and right
-						{
-							CellGrid[(x - 1) * cellGridCols + y + 1].SetBottomInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * angle_direction / 0.5);
-							CellGrid[(x - 1) * cellGridCols + y + 1].SetLeftInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)) * angle_direction / 0.5);
-							CellGrid[x * cellGridCols + y + 1].SetBottomInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * (1 - angle_direction) / 0.5);
-							CellGrid[x * cellGridCols + y + 1].SetLeftInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)) * (1 - angle_direction) / 0.5);
-						}
-						else	//move to top and top right
-						{
-							CellGrid[(x - 1) * cellGridCols + y].SetBottomInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * (angle_direction - 0.5) / 0.5);
-							CellGrid[(x - 1) * cellGridCols + y].SetLeftInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)) * (angle_direction - 0.5) / 0.5);
-							CellGrid[(x - 1) * cellGridCols + y + 1].SetBottomInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * (1 - (angle_direction - 0.5)) / 0.5);
-							CellGrid[(x - 1) * cellGridCols + y + 1].SetLeftInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)) * (1 - (angle_direction - 0.5)) / 0.5);
-						}
-					}
-				}
-				else if (alpha < 0 && x_direction < 0 && y_direction > 0)	//move to top left
-				{
-					if (!CellGrid[(x - 1) * cellGridCols + y - 1].GetFluid())		//top left is solid
-					{
-						CellGrid[(x - 1) * cellGridCols + y].SetBottomInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)));
-						CellGrid[x * cellGridCols + y - 1].SetRightInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)));
-					}
-					else
-					{
-						double angle_direction = -alpha / 90;
-						if (angle_direction <= 0.5)		//move to top left and left
-						{
-							CellGrid[(x - 1) * cellGridCols + y - 1].SetBottomInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * angle_direction / 0.5);
-							CellGrid[(x - 1) * cellGridCols + y - 1].SetRightInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)) * angle_direction / 0.5);
-							CellGrid[x * cellGridCols + y - 1].SetBottomInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * (1 - angle_direction) / 0.5);
-							CellGrid[x * cellGridCols + y - 1].SetRightInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)) * (1 - angle_direction) / 0.5);
-						}
-						else	//move to top and top left
-						{
-							CellGrid[(x - 1) * cellGridCols + y].SetBottomInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * (angle_direction - 0.5) / 0.5);
-							CellGrid[(x - 1) * cellGridCols + y].SetRightInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)) * (angle_direction - 0.5) / 0.5);
-							CellGrid[(x - 1) * cellGridCols + y - 1].SetBottomInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * (1 - (angle_direction - 0.5)) / 0.5);
-							CellGrid[(x - 1) * cellGridCols + y - 1].SetRightInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)) * (1 - (angle_direction - 0.5)) / 0.5);
-						}
-					}
-				}
-				else if (alpha > 0 && x_direction < 0 && y_direction < 0)	//move to bottom left
-				{
-					if (!CellGrid[(x + 1) * cellGridCols + y - 1].GetFluid())		//bottom left is solid
-					{
-						CellGrid[(x + 1) * cellGridCols + y].SetTopInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)));
-						CellGrid[x * cellGridCols + y - 1].SetRightInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)));
-					}
-					else
-					{
-						double angle_direction = alpha / 90;
-						if (angle_direction <= 0.5)		//move to bottom left and left
-						{
-							CellGrid[(x + 1) * cellGridCols + y - 1].SetTopInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * angle_direction / 0.5);
-							CellGrid[(x + 1) * cellGridCols + y - 1].SetRightInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)) * angle_direction / 0.5);
-							CellGrid[x * cellGridCols + y - 1].SetTopInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * (1 - angle_direction) / 0.5);
-							CellGrid[x * cellGridCols + y - 1].SetRightInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)) * (1 - angle_direction) / 0.5);
-						}
-						else	//move to bottom and bottom left
-						{
-							CellGrid[(x + 1) * cellGridCols + y].SetTopInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * (angle_direction - 0.5) / 0.5);
-							CellGrid[(x + 1) * cellGridCols + y].SetRightInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)) * (angle_direction - 0.5) / 0.5);
-							CellGrid[(x + 1) * cellGridCols + y - 1].SetTopInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * (1 - (angle_direction - 0.5)) / 0.5);
-							CellGrid[(x + 1) * cellGridCols + y - 1].SetRightInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)) * (1 - (angle_direction - 0.5)) / 0.5);
-						}
-					}
-				}
-				else if (alpha < 0 && x_direction > 0 && y_direction < 0)	//move to bottom right
-				{
-					if (!CellGrid[(x + 1) * cellGridCols + y + 1].GetFluid())		//bottom right is solid
-					{
-						CellGrid[(x + 1) * cellGridCols + y].SetTopInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)));
-						CellGrid[x * cellGridCols + y + 1].SetLeftInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)));
-					}
-					else
-					{
-						double angle_direction = -alpha / 90;
-						if (angle_direction <= 0.5)		//move to bottom right and right
-						{
-							CellGrid[(x + 1) * cellGridCols + y + 1].SetTopInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * angle_direction / 0.5);
-							CellGrid[(x + 1) * cellGridCols + y + 1].SetLeftInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)) * angle_direction / 0.5);
-							CellGrid[x * cellGridCols + y + 1].SetTopInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * (1 - angle_direction) / 0.5);
-							CellGrid[x * cellGridCols + y + 1].SetLeftInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)) * (1 - angle_direction) / 0.5);
-						}
-						else	//move to bottom and bottom right
-						{
-							CellGrid[(x + 1) * cellGridCols + y].SetTopInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * (angle_direction - 0.5) / 0.5);
-							CellGrid[(x + 1) * cellGridCols + y].SetLeftInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)) * (angle_direction - 0.5) / 0.5);
-							CellGrid[(x + 1) * cellGridCols + y + 1].SetTopInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * (1 - (angle_direction - 0.5)) / 0.5);
-							CellGrid[(x + 1) * cellGridCols + y + 1].SetLeftInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)) * (1 - (angle_direction - 0.5)) / 0.5);
-						}
-					}
-				}
-				FluidCells[i]->SetOutputTotal(total);
-			}*/
 		}
 		
-
 		ShowStep();
 		cout << endl<< "Liczba komorek niezbilansowanych: " << unbalancedCells << endl;
 		cout << endl << endl;
+		
 	}while(unbalancedCells != 0);
 }
 
@@ -537,9 +414,10 @@ void Solver::ShowStep()
 			//if( CellGrid[i][j].GetFluid() )
 				//cout << CellGrid[i][j].GetFluidAmount() << " ";
 				//cout << CellGrid[i*cellGridCols+j].GetFluidAmount() << " ";
-				printf("%.0f ", CellGrid[i * cellGridCols + j].GetFluidAmount() );
+				//printf("%.0f ", CellGrid[i * cellGridCols + j].GetFluidAmount() );
+				printf("%.1f ", CellGrid[i * cellGridCols + j].GetVelocity());
 			else
-				cout << "   ";
+				cout << "  ";
 		}
 		cout << endl;
 	}

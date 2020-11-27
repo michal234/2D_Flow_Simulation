@@ -20,6 +20,7 @@ class Cell
 		int typeOfNeighbourhoodOnSlant;
 
 		double fluid_amount;	//amount of fluid in the cell (= total_input)
+		double velocity;
 
 		//amount of fluid that flows into the cell in current step
 		double input_top;
@@ -71,6 +72,7 @@ class Cell
 		double GetInputBottom();
 		double GetInputLeft();*/
 		double GetFluidAmount();
+		double GetVelocity();
 		int GetX();
 		int GetY();
 		void SetSource();
