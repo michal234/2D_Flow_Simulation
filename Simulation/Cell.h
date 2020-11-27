@@ -15,7 +15,9 @@ class Cell
 		int y;	//Y-coordinate of the cell
 
 		map<string, Cell*> neighbours;	//neighbours of the cell
+		map<string, Cell*> neighboursOnSlant;
 		int typeOfNeighbourhood;
+		int typeOfNeighbourhoodOnSlant;
 
 		double fluid_amount;	//amount of fluid in the cell (= total_input)
 
@@ -53,6 +55,8 @@ class Cell
 		void UniformFlow();
 		void FlowToNeighbours(double xd, double yd, double x_flow, double y_flow);
 		void FlowToNeighbours2(double top_flow, double right_flow, double bottom_flow, double left_flow);
+		void FlowToNeighboursOnSlant(double top_flow, double right_flow, double bottom_flow, double left_flow, int direction);
+		int ChooseDirection(double x_direction, double y_direction);
 
 	public:
 		Cell();
@@ -62,6 +66,10 @@ class Cell
 		bool GetBoundary();
 		bool GetSource();
 		bool GetBalance();
+		/*double GetInputTop();
+		double GetInputRight();
+		double GetInputBottom();
+		double GetInputLeft();*/
 		double GetFluidAmount();
 		int GetX();
 		int GetY();
@@ -70,6 +78,8 @@ class Cell
 		//void SetNeighbours(map<string, Cell*> neighbours);
 		void SetNeighbours(Cell* top, Cell* right, Cell* bottom, Cell* left);
 		void SetTypeOfNeighbourhood(int type);
+		void SetNeighboursOnSlant(Cell* topRight, Cell* bottomRight, Cell* bottomLeft, Cell* topLeft);
+		void SetTypeOfNeighbourhoodOnSlant(int type);
 
 		void FluidFlow();
 
@@ -77,6 +87,8 @@ class Cell
 		void SetRightInput(double input);
 		void SetBottomInput(double input);
 		void SetLeftInput(double input);
+
+		/*void SetOutputTotal(double out);*/
 
 		void Update();
 };

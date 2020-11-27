@@ -27,7 +27,7 @@ void Solver::CellGridInitialization(BinaryMap bm)
 	cellGridCols = bm.GetCols();
 	for (int i = 0; i < cellGridRows; i++)
 	{
-		//vector<Cell*> vc = vector<Cell*>();
+		//vector<Cell> vc = vector<Cell>();
 		for (int j = 0; j < cellGridCols; j++)
 		{
 			int element = bm.GetElement(i, j);
@@ -53,8 +53,10 @@ void Solver::CellGridInitialization(BinaryMap bm)
 		for (int j = 0; j < cellGridCols; j++)
 		{
 			if (CellGrid[i * cellGridCols + j].GetFluid())
+			//if( CellGrid[i][j].GetFluid() )
 			{
 				FluidCells.push_back(&CellGrid[i*cellGridCols+j]);
+				//FluidCells.push_back(&CellGrid[i][j]);
 			}
 		}
 	}
@@ -106,9 +108,131 @@ void Solver::Simulate()
 			FluidCells[i]->FluidFlow();
 			if( !FluidCells[i]->GetBalance() )
 			{
-				
 				unbalancedCells++;
 			}
+			/*if (slant)
+			{
+				double top = FluidCells[i]->GetInputTop();
+				double right = FluidCells[i]->GetInputRight();
+				double bottom = FluidCells[i]->GetInputBottom();
+				double left = FluidCells[i]->GetInputLeft();
+
+				double total = top + right + bottom + left;
+
+				int x = FluidCells[i]->GetX();
+				int y = FluidCells[i]->GetY();
+
+				double x_direction = left - right;
+				double y_direction = bottom - top;
+
+				double alpha = atan(y_direction / x_direction) * 180 / PI;
+
+				if (alpha > 0 && x_direction > 0 && y_direction > 0)	//move to top right
+				{
+					if (!CellGrid[(x - 1) * cellGridCols + y + 1].GetFluid())		//top right is solid
+					{
+						CellGrid[(x - 1) * cellGridCols + y].SetBottomInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)));
+						CellGrid[x * cellGridCols + y + 1].SetLeftInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)));
+					}
+					else
+					{
+						double angle_direction = alpha / 90;
+						if (angle_direction <= 0.5)		//move to top right and right
+						{
+							CellGrid[(x - 1) * cellGridCols + y + 1].SetBottomInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * angle_direction / 0.5);
+							CellGrid[(x - 1) * cellGridCols + y + 1].SetLeftInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)) * angle_direction / 0.5);
+							CellGrid[x * cellGridCols + y + 1].SetBottomInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * (1 - angle_direction) / 0.5);
+							CellGrid[x * cellGridCols + y + 1].SetLeftInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)) * (1 - angle_direction) / 0.5);
+						}
+						else	//move to top and top right
+						{
+							CellGrid[(x - 1) * cellGridCols + y].SetBottomInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * (angle_direction - 0.5) / 0.5);
+							CellGrid[(x - 1) * cellGridCols + y].SetLeftInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)) * (angle_direction - 0.5) / 0.5);
+							CellGrid[(x - 1) * cellGridCols + y + 1].SetBottomInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * (1 - (angle_direction - 0.5)) / 0.5);
+							CellGrid[(x - 1) * cellGridCols + y + 1].SetLeftInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)) * (1 - (angle_direction - 0.5)) / 0.5);
+						}
+					}
+				}
+				else if (alpha < 0 && x_direction < 0 && y_direction > 0)	//move to top left
+				{
+					if (!CellGrid[(x - 1) * cellGridCols + y - 1].GetFluid())		//top left is solid
+					{
+						CellGrid[(x - 1) * cellGridCols + y].SetBottomInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)));
+						CellGrid[x * cellGridCols + y - 1].SetRightInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)));
+					}
+					else
+					{
+						double angle_direction = -alpha / 90;
+						if (angle_direction <= 0.5)		//move to top left and left
+						{
+							CellGrid[(x - 1) * cellGridCols + y - 1].SetBottomInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * angle_direction / 0.5);
+							CellGrid[(x - 1) * cellGridCols + y - 1].SetRightInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)) * angle_direction / 0.5);
+							CellGrid[x * cellGridCols + y - 1].SetBottomInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * (1 - angle_direction) / 0.5);
+							CellGrid[x * cellGridCols + y - 1].SetRightInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)) * (1 - angle_direction) / 0.5);
+						}
+						else	//move to top and top left
+						{
+							CellGrid[(x - 1) * cellGridCols + y].SetBottomInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * (angle_direction - 0.5) / 0.5);
+							CellGrid[(x - 1) * cellGridCols + y].SetRightInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)) * (angle_direction - 0.5) / 0.5);
+							CellGrid[(x - 1) * cellGridCols + y - 1].SetBottomInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * (1 - (angle_direction - 0.5)) / 0.5);
+							CellGrid[(x - 1) * cellGridCols + y - 1].SetRightInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)) * (1 - (angle_direction - 0.5)) / 0.5);
+						}
+					}
+				}
+				else if (alpha > 0 && x_direction < 0 && y_direction < 0)	//move to bottom left
+				{
+					if (!CellGrid[(x + 1) * cellGridCols + y - 1].GetFluid())		//bottom left is solid
+					{
+						CellGrid[(x + 1) * cellGridCols + y].SetTopInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)));
+						CellGrid[x * cellGridCols + y - 1].SetRightInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)));
+					}
+					else
+					{
+						double angle_direction = alpha / 90;
+						if (angle_direction <= 0.5)		//move to bottom left and left
+						{
+							CellGrid[(x + 1) * cellGridCols + y - 1].SetTopInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * angle_direction / 0.5);
+							CellGrid[(x + 1) * cellGridCols + y - 1].SetRightInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)) * angle_direction / 0.5);
+							CellGrid[x * cellGridCols + y - 1].SetTopInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * (1 - angle_direction) / 0.5);
+							CellGrid[x * cellGridCols + y - 1].SetRightInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)) * (1 - angle_direction) / 0.5);
+						}
+						else	//move to bottom and bottom left
+						{
+							CellGrid[(x + 1) * cellGridCols + y].SetTopInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * (angle_direction - 0.5) / 0.5);
+							CellGrid[(x + 1) * cellGridCols + y].SetRightInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)) * (angle_direction - 0.5) / 0.5);
+							CellGrid[(x + 1) * cellGridCols + y - 1].SetTopInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * (1 - (angle_direction - 0.5)) / 0.5);
+							CellGrid[(x + 1) * cellGridCols + y - 1].SetRightInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)) * (1 - (angle_direction - 0.5)) / 0.5);
+						}
+					}
+				}
+				else if (alpha < 0 && x_direction > 0 && y_direction < 0)	//move to bottom right
+				{
+					if (!CellGrid[(x + 1) * cellGridCols + y + 1].GetFluid())		//bottom right is solid
+					{
+						CellGrid[(x + 1) * cellGridCols + y].SetTopInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)));
+						CellGrid[x * cellGridCols + y + 1].SetLeftInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)));
+					}
+					else
+					{
+						double angle_direction = -alpha / 90;
+						if (angle_direction <= 0.5)		//move to bottom right and right
+						{
+							CellGrid[(x + 1) * cellGridCols + y + 1].SetTopInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * angle_direction / 0.5);
+							CellGrid[(x + 1) * cellGridCols + y + 1].SetLeftInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)) * angle_direction / 0.5);
+							CellGrid[x * cellGridCols + y + 1].SetTopInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * (1 - angle_direction) / 0.5);
+							CellGrid[x * cellGridCols + y + 1].SetLeftInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)) * (1 - angle_direction) / 0.5);
+						}
+						else	//move to bottom and bottom right
+						{
+							CellGrid[(x + 1) * cellGridCols + y].SetTopInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * (angle_direction - 0.5) / 0.5);
+							CellGrid[(x + 1) * cellGridCols + y].SetLeftInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)) * (angle_direction - 0.5) / 0.5);
+							CellGrid[(x + 1) * cellGridCols + y + 1].SetTopInput(total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * (1 - (angle_direction - 0.5)) / 0.5);
+							CellGrid[(x + 1) * cellGridCols + y + 1].SetLeftInput(total * abs(x_direction) / (abs(x_direction) + abs(y_direction)) * (1 - (angle_direction - 0.5)) / 0.5);
+						}
+					}
+				}
+				FluidCells[i]->SetOutputTotal(total);
+			}*/
 		}
 		UpdateGrid();
 
@@ -131,29 +255,40 @@ void Solver::SetNeighbours()
 
 		Cell outer = Cell(true);	//default fluid cell for cells on the boundary
 
+		Cell* top;
+		Cell* right;
+		Cell* bottom;
+		Cell* left;
+
+		Cell* topRight;
+		Cell* bottomRight;
+		Cell* bottomLeft;
+		Cell* topLeft;
+
+		int type = 0;
+		int type_slant = 0;
+
 
 		if (!cell->GetBoundary())	//if the cell lays in the interior
 		{
-			/*Cell* top = CellGrid[x-1][y];
-			Cell* right = CellGrid[x][y+1];
-			Cell* bottom = CellGrid[x+1][y];
-			Cell* left = CellGrid[x][y-1];*/
+			/*Cell* top = &CellGrid[x-1][y];
+			Cell* right = &CellGrid[x][y+1];
+			Cell* bottom = &CellGrid[x+1][y];
+			Cell* left = &CellGrid[x][y-1];*/
 
-			Cell* top = &CellGrid[(x-1)*cellGridCols + y];
-			Cell* right = &CellGrid[x*cellGridCols + y + 1];
-			Cell* bottom = &CellGrid[(x+1)*cellGridCols + y];
-			Cell* left = &CellGrid[x*cellGridCols + y - 1];
+			top = &CellGrid[(x-1)*cellGridCols + y];
+			right = &CellGrid[x*cellGridCols + y + 1];
+			bottom = &CellGrid[(x+1)*cellGridCols + y];
+			left = &CellGrid[x*cellGridCols + y - 1];
 
-			int type = TypeOfNeighbourhood(*top, *right, *bottom, *left);
+			topRight = &CellGrid[(x-1)*cellGridCols + y + 1];
+			bottomRight = &CellGrid[(x+1)*cellGridCols + y + 1];
+			bottomLeft = &CellGrid[(x+1)*cellGridCols + y - 1];
+			topLeft = &CellGrid[(x-1)*cellGridCols + y - 1];
 
-			/*neighbours.insert({"Top", top});
-			neighbours.insert({ "Right", right });
-			neighbours.insert({ "Bottom", bottom });
-			neighbours.insert({ "Left", left });*/
+			type = TypeOfNeighbourhood(*top, *right, *bottom, *left);
+			type_slant = TypeOfNeighbourhood(*topRight, *bottomRight, *bottomLeft, *topLeft);
 
-			//cell->SetNeighbours(neighbours);
-			cell->SetNeighbours(top, right, bottom, left);
-			cell->SetTypeOfNeighbourhood(type);
 		}
 		else	//if the cell lays on the boundary
 		{
@@ -162,201 +297,180 @@ void Solver::SetNeighbours()
 				if (y == 0)	//top left corner
 				{
 					/*Cell* top = &outer;
-					Cell* right = CellGrid[x][y + 1];
-					Cell* bottom = CellGrid[x + 1][y];
+					Cell* right = &CellGrid[x][y + 1];
+					Cell* bottom = &CellGrid[x + 1][y];
 					Cell* left = &outer;*/
 
-					Cell* top = &outer;
-					Cell* right = &CellGrid[x*cellGridCols + y + 1];
-					Cell* bottom = &CellGrid[(x+1)*cellGridCols + y];
-					Cell* left = &outer;
+					top = &outer;
+					right = &CellGrid[x*cellGridCols + y + 1];
+					bottom = &CellGrid[(x+1)*cellGridCols + y];
+					left = &outer;
 
-					int type = TypeOfNeighbourhood(*top, *right, *bottom, *left);
+					topRight = &outer;
+					bottomRight = &CellGrid[(x + 1) * cellGridCols + y + 1];
+					bottomLeft = &outer;
+					topLeft = &outer;
 
-					/*neighbours.insert({ "Top", top });
-					neighbours.insert({ "Right", right });
-					neighbours.insert({ "Bottom", bottom });
-					neighbours.insert({ "Left", left });*/
+					type = TypeOfNeighbourhood(*top, *right, *bottom, *left);
+					type_slant = TypeOfNeighbourhood(*topRight, *bottomRight, *bottomLeft, *topLeft);
 
-					//cell->SetNeighbours(neighbours);
-					cell->SetNeighbours(top, right, bottom, left);
-					cell->SetTypeOfNeighbourhood(type);
 				}
 				else if (y == cellGridCols - 1)	//top right corner
 				{
 					/*Cell* top = &outer;
 					Cell* right = &outer;
-					Cell* bottom = CellGrid[x + 1][y];
-					Cell* left = CellGrid[x][y - 1];*/
+					Cell* bottom = &CellGrid[x + 1][y];
+					Cell* left = &CellGrid[x][y - 1];*/
 
-					Cell* top = &outer;
-					Cell* right = &outer;
-					Cell* bottom = &CellGrid[(x+1)*cellGridCols + y];
-					Cell* left = &CellGrid[x*cellGridCols + y - 1];
+					top = &outer;
+					right = &outer;
+					bottom = &CellGrid[(x+1)*cellGridCols + y];
+					left = &CellGrid[x*cellGridCols + y - 1];
 
-					int type = TypeOfNeighbourhood(*top, *right, *bottom, *left);
+					topRight = &outer;
+					bottomRight = &outer;
+					bottomLeft = &CellGrid[(x + 1) * cellGridCols + y - 1];
+					topLeft = &outer;
 
-					/*neighbours.insert({ "Top", top });
-					neighbours.insert({ "Right", right });
-					neighbours.insert({ "Bottom", bottom });
-					neighbours.insert({ "Left", left });*/
-
-					//cell->SetNeighbours(neighbours);
-					cell->SetNeighbours(top, right, bottom, left);
-					cell->SetTypeOfNeighbourhood(type);
+					type = TypeOfNeighbourhood(*top, *right, *bottom, *left);
+					type_slant = TypeOfNeighbourhood(*topRight, *bottomRight, *bottomLeft, *topLeft);
 				}
 				else	//the rest of the top boundary
 				{
 					/*Cell* top = &outer;
-					Cell* right = CellGrid[x][y + 1];
-					Cell* bottom = CellGrid[x + 1][y];
-					Cell* left = CellGrid[x][y - 1];*/
+					Cell* right = &CellGrid[x][y + 1];
+					Cell* bottom = &CellGrid[x + 1][y];
+					Cell* left = &CellGrid[x][y - 1];*/
 
-					Cell* top = &outer;
-					Cell* right = &CellGrid[x*cellGridCols + y + 1];
-					Cell* bottom = &CellGrid[(x+1)*cellGridCols + y];
-					Cell* left = &CellGrid[x * cellGridCols + y - 1];
+					top = &outer;
+					right = &CellGrid[x*cellGridCols + y + 1];
+					bottom = &CellGrid[(x+1)*cellGridCols + y];
+					left = &CellGrid[x * cellGridCols + y - 1];
 
-					int type = TypeOfNeighbourhood(*top, *right, *bottom, *left);
+					topRight = &outer;
+					bottomRight = &CellGrid[(x + 1) * cellGridCols + y + 1];
+					bottomLeft = &CellGrid[(x + 1) * cellGridCols + y - 1];
+					topLeft = &outer;
 
-					/*neighbours.insert({ "Top", top });
-					neighbours.insert({ "Right", right });
-					neighbours.insert({ "Bottom", bottom });
-					neighbours.insert({ "Left", left });*/
-
-					//cell->SetNeighbours(neighbours);
-					cell->SetNeighbours(top, right, bottom, left);
-					cell->SetTypeOfNeighbourhood(type);
+					type = TypeOfNeighbourhood(*top, *right, *bottom, *left);
+					type_slant = TypeOfNeighbourhood(*topRight, *bottomRight, *bottomLeft, *topLeft);
 				}
 			}
 			else if (x == cellGridRows - 1)	//bottom boundary
 			{
 				if (y == 0)	//bottom left corner
 				{
-					/*Cell* top = CellGrid[x - 1][y];
-					Cell* right = CellGrid[x][y + 1];
+					/*Cell* top = &CellGrid[x - 1][y];
+					Cell* right = &CellGrid[x][y + 1];
 					Cell* bottom = &outer;
 					Cell* left = &outer;*/
 
-					Cell* top = &CellGrid[(x-1)*cellGridCols + y];
-					Cell* right = &CellGrid[x * cellGridCols + y + 1];
-					Cell* bottom = &outer;
-					Cell* left = &outer;
+					top = &CellGrid[(x-1)*cellGridCols + y];
+					right = &CellGrid[x * cellGridCols + y + 1];
+					bottom = &outer;
+					left = &outer;
 
-					int type = TypeOfNeighbourhood(*top, *right, *bottom, *left);
+					topRight = &CellGrid[(x - 1) * cellGridCols + y + 1];
+					bottomRight = &outer;
+					bottomLeft = &outer;
+					topLeft = &outer;
 
-					/*neighbours.insert({ "Top", top });
-					neighbours.insert({ "Right", right });
-					neighbours.insert({ "Bottom", bottom });
-					neighbours.insert({ "Left", left });*/
-
-					//cell->SetNeighbours(neighbours);
-					cell->SetNeighbours(top, right, bottom, left);
-					cell->SetTypeOfNeighbourhood(type);
+					type = TypeOfNeighbourhood(*top, *right, *bottom, *left);
+					type_slant = TypeOfNeighbourhood(*topRight, *bottomRight, *bottomLeft, *topLeft);
 				}
 				else if (y == cellGridCols - 1)	//bottom right corner
 				{
-					/*Cell* top = CellGrid[x - 1][y];
+					/*Cell* top = &CellGrid[x - 1][y];
 					Cell* right = &outer;
 					Cell* bottom = &outer;
-					Cell* left = CellGrid[x][y - 1];*/
+					Cell* left = &CellGrid[x][y - 1];*/
 
-					Cell* top = &CellGrid[(x-1)*cellGridCols + y];
-					Cell* right = &outer;
-					Cell* bottom = &outer;
-					Cell* left = &CellGrid[x*cellGridCols + y - 1];
+					top = &CellGrid[(x-1)*cellGridCols + y];
+					right = &outer;
+					bottom = &outer;
+					left = &CellGrid[x*cellGridCols + y - 1];
 
-					int type = TypeOfNeighbourhood(*top, *right, *bottom, *left);
+					topRight = &outer;
+					bottomRight = &outer;
+					bottomLeft = &outer;
+					topLeft = &CellGrid[(x - 1) * cellGridCols + y - 1];
 
-					/*neighbours.insert({ "Top", top });
-					neighbours.insert({ "Right", right });
-					neighbours.insert({ "Bottom", bottom });
-					neighbours.insert({ "Left", left });*/
-
-					//cell->SetNeighbours(neighbours);
-					cell->SetNeighbours(top, right, bottom, left);
-					cell->SetTypeOfNeighbourhood(type);
+					type = TypeOfNeighbourhood(*top, *right, *bottom, *left);
+					type_slant = TypeOfNeighbourhood(*topRight, *bottomRight, *bottomLeft, *topLeft);
 				}
 				else	//the rest of the bottom boundary
 				{
-					/*Cell* top = CellGrid[x - 1][y];
-					Cell* right = CellGrid[x][y + 1];
+					/*Cell* top = &CellGrid[x - 1][y];
+					Cell* right = &CellGrid[x][y + 1];
 					Cell* bottom = &outer;
-					Cell* left = CellGrid[x][y - 1];*/
+					Cell* left = &CellGrid[x][y - 1];*/
 
-					Cell* top = &CellGrid[(x-1)*cellGridCols + y];
-					Cell* right = &CellGrid[x*cellGridCols + y + 1];
-					Cell* bottom = &outer;
-					Cell* left = &CellGrid[x*cellGridCols + y - 1];
+					top = &CellGrid[(x-1)*cellGridCols + y];
+					right = &CellGrid[x*cellGridCols + y + 1];
+					bottom = &outer;
+					left = &CellGrid[x*cellGridCols + y - 1];
 
-					int type = TypeOfNeighbourhood(*top, *right, *bottom, *left);
+					topRight = &CellGrid[(x - 1) * cellGridCols + y + 1];
+					bottomRight = &outer;
+					bottomLeft = &outer;
+					topLeft = &CellGrid[(x - 1) * cellGridCols + y - 1];
 
-					/*neighbours.insert({ "Top", top });
-					neighbours.insert({ "Right", right });
-					neighbours.insert({ "Bottom", bottom });
-					neighbours.insert({ "Left", left });*/
-
-					//cell->SetNeighbours(neighbours);
-					cell->SetNeighbours(top, right, bottom, left);
-					cell->SetTypeOfNeighbourhood(type);
+					type = TypeOfNeighbourhood(*top, *right, *bottom, *left);
+					type_slant = TypeOfNeighbourhood(*topRight, *bottomRight, *bottomLeft, *topLeft);
 				}
 			}
 			else if (y == 0)	//left boundary (without corners)
 			{
-				/*Cell* top = CellGrid[x - 1][y];
-				Cell* right = CellGrid[x][y + 1];
-				Cell* bottom = CellGrid[x + 1][y];
+				/*Cell* top = &CellGrid[x - 1][y];
+				Cell* right = &CellGrid[x][y + 1];
+				Cell* bottom = &CellGrid[x + 1][y];
 				Cell* left = &outer;*/
 
-				Cell* top = &CellGrid[(x-1)*cellGridCols + y];
-				Cell* right = &CellGrid[x*cellGridCols + y + 1];
-				Cell* bottom = &CellGrid[(x+1)*cellGridCols + y];
-				Cell* left = &outer;
+				top = &CellGrid[(x-1)*cellGridCols + y];
+				right = &CellGrid[x*cellGridCols + y + 1];
+				bottom = &CellGrid[(x+1)*cellGridCols + y];
+				left = &outer;
 
-				int type = TypeOfNeighbourhood(*top, *right, *bottom, *left);
+				topRight = &CellGrid[(x - 1) * cellGridCols + y + 1];
+				bottomRight = &CellGrid[(x + 1) * cellGridCols + y + 1];
+				bottomLeft = &outer;
+				topLeft = &outer;
 
-				/*neighbours.insert({ "Top", top });
-				neighbours.insert({ "Right", right });
-				neighbours.insert({ "Bottom", bottom });
-				neighbours.insert({ "Left", left });*/
-
-				//cell->SetNeighbours(neighbours);
-				cell->SetNeighbours(top, right, bottom, left);
-				cell->SetTypeOfNeighbourhood(type);
+				type = TypeOfNeighbourhood(*top, *right, *bottom, *left);
+				type_slant = TypeOfNeighbourhood(*topRight, *bottomRight, *bottomLeft, *topLeft);
 			}
 			else	//right boundary (without corners)
 			{
-				/*Cell* top = CellGrid[x - 1][y];
+				/*Cell* top = &CellGrid[x - 1][y];
 				Cell* right = &outer;
-				Cell* bottom = CellGrid[x + 1][y];
-				Cell* left = CellGrid[x][y - 1];*/
+				Cell* bottom = &CellGrid[x + 1][y];
+				Cell* left = &CellGrid[x][y - 1];*/
 
-				Cell* top = &CellGrid[(x-1)*cellGridCols + y];
-				Cell* right = &outer;
-				Cell* bottom = &CellGrid[(x+1)*cellGridCols + y];
-				Cell* left = &CellGrid[x*cellGridCols + y - 1];
+				top = &CellGrid[(x-1)*cellGridCols + y];
+				right = &outer;
+				bottom = &CellGrid[(x+1)*cellGridCols + y];
+				left = &CellGrid[x*cellGridCols + y - 1];
 				
-				int type = TypeOfNeighbourhood(*top, *right, *bottom, *left);
+				topRight = &outer;
+				bottomRight = &outer;
+				bottomLeft = &CellGrid[(x + 1) * cellGridCols + y - 1];
+				topLeft = &CellGrid[(x - 1) * cellGridCols + y - 1];
 
-				/*neighbours.insert({ "Top", top });
-				neighbours.insert({ "Right", right });
-				neighbours.insert({ "Bottom", bottom });
-				neighbours.insert({ "Left", left });*/
-
-				//cell->SetNeighbours(neighbours);
-				cell->SetNeighbours(top, right, bottom, left);
-				cell->SetTypeOfNeighbourhood(type);
+				type = TypeOfNeighbourhood(*top, *right, *bottom, *left);
+				type_slant = TypeOfNeighbourhood(*topRight, *bottomRight, *bottomLeft, *topLeft);
 			}
 		}
 
-		//CellGrid[x*cellGridCols + y] = *cell;
-		//neighbours.clear();		//clear the map of neighbours in order to create place for the noighbours of the next cell
+		cell->SetNeighbours(top, right, bottom, left);
+		cell->SetTypeOfNeighbourhood(type);
+		cell->SetNeighboursOnSlant(topRight, bottomRight, bottomLeft, topLeft);
+		cell->SetTypeOfNeighbourhoodOnSlant(type_slant);
 	}
 
 	cout << "Przydzielanie sasiadow zakonczone\n";
 }
 
-int Solver::TypeOfNeighbourhood(Cell top, Cell right, Cell bottom, Cell left)
+int Solver::TypeOfNeighbourhood(Cell top, Cell right, Cell bottom, Cell left)	//(*topRight, *bottomRight, *bottomLeft, *topLeft) for slant
 {
 	bool t = top.GetFluid();
 	bool r = right.GetFluid();
@@ -418,9 +532,12 @@ void Solver::ShowStep()
 		for (int j = 0; j < cellGridCols; j++)
 		{
 			if( CellGrid[i*cellGridCols+j].GetFluid() )
+			//if( CellGrid[i][j].GetFluid() )
+				//cout << CellGrid[i][j].GetFluidAmount() << " ";
 				cout << CellGrid[i*cellGridCols+j].GetFluidAmount() << " ";
+				//printf("%.1f ", CellGrid[i * cellGridCols + j].GetFluidAmount() );
 			else
-				cout << "  ";
+				cout << "   ";
 		}
 		cout << endl;
 	}

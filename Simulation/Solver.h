@@ -4,6 +4,8 @@
 #include "Cell.h"
 #include "BinaryMap.h"
 
+#define PI 3.14159265
+
 using namespace std;
 
 class Solver
