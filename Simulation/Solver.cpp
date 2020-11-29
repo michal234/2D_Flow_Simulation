@@ -7,6 +7,7 @@ Solver::Solver()
 	cellGridCols = 0;
 	cellGridRows = 0;
 	v_start = 0.0;
+	fluid_input = 0.0;
 }
 
 bool Solver::GetInitialized()
@@ -76,6 +77,7 @@ void Solver::SetBoundaryConditions(double v)
 		{
 			FluidCells[i]->SetLeftInput(v);
 			FluidCells[i]->SetSource();
+			fluid_input += v;
 		}
 	}
 	/*for (int i = 0; i < cellGridRows; i++)
@@ -99,10 +101,11 @@ void Solver::Simulate()
 	UpdateGrid();
 
 	int unbalancedCells = 0;
+	int x = 0;
 
 	do
 	{
-		UpdateGrid();
+		//UpdateGrid();
 		unbalancedCells = 0;
 		for (int i = 0; i < FluidCells.size(); i++)
 		{
@@ -113,12 +116,19 @@ void Solver::Simulate()
 				unbalancedCells++;
 			}
 		}
-		
+		//Standarization();
+		UpdateGrid();
 		ShowStep();
 		cout << endl<< "Liczba komorek niezbilansowanych: " << unbalancedCells << endl;
 		cout << endl << endl;
+		x++;
 		
-	}while(unbalancedCells != 0);
+	//}while(unbalancedCells != 0);
+	}while(x < 100);
+
+	Standarization();
+	//UpdateGrid();
+	ShowStep();
 }
 
 void Solver::SetNeighbours()
@@ -414,11 +424,35 @@ void Solver::ShowStep()
 			//if( CellGrid[i][j].GetFluid() )
 				//cout << CellGrid[i][j].GetFluidAmount() << " ";
 				//cout << CellGrid[i*cellGridCols+j].GetFluidAmount() << " ";
-				//printf("%.0f ", CellGrid[i * cellGridCols + j].GetFluidAmount() );
-				printf("%.1f ", CellGrid[i * cellGridCols + j].GetVelocity());
+				printf("%.0f ", CellGrid[i * cellGridCols + j].GetFluidAmount() );
+				//printf("%.1f ", CellGrid[i * cellGridCols + j].GetVelocity());
 			else
 				cout << "  ";
 		}
 		cout << endl;
 	}
+}
+
+void Solver::Standarization()
+{
+	for (int j = 0; j < cellGridCols; j++)
+	{
+		double fluid_amount = 0.0;
+		for (int i = 0; i < cellGridRows; i++)
+		{
+			if( CellGrid[i*cellGridCols + j].GetFluid() )
+				fluid_amount += CellGrid[i * cellGridCols + j].GetFluidAmount();
+		}
+
+		if (abs(fluid_input - fluid_amount) > 1e-3 && abs(fluid_amount) > 1e-5 )
+		{
+			double factor = fluid_input / fluid_amount;
+			for (int i = 0; i < cellGridRows; i++)
+			{
+				if (CellGrid[i * cellGridCols + j].GetFluid())
+					CellGrid[i * cellGridCols + j].StandarizeCell(factor);
+			}
+		}
+	}
+
 }

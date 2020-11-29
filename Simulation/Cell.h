@@ -93,5 +93,6 @@ class Cell
 		/*void SetOutputTotal(double out);*/
 
 		void Update();
+		void StandarizeCell(double factor);
 };
 

@@ -18,12 +18,14 @@ class Solver
 		vector<Cell> CellGrid;
 		vector<Cell*> FluidCells;
 		double v_start;
+		double fluid_input;
 
 		void SetNeighbours();
 		int TypeOfNeighbourhood(Cell top, Cell right, Cell bottom, Cell left);
 		void UpdateGrid();
 
 		void ShowStep();
+		void Standarization();
 
 	public:
 		Solver();

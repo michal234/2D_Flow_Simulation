@@ -1923,3 +1923,12 @@ int Cell::ChooseDirection(double x_direction, double y_direction)
 
 	return 0;
 }
+
+void Cell::StandarizeCell(double factor)
+{
+	input_bottom_next *= factor;
+	input_left_next *= factor;
+	input_right_next *= factor;
+	input_top_next *= factor;
+	fluid_amount *= factor;
+}
