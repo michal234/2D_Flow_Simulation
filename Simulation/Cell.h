@@ -10,6 +10,7 @@ class Cell
 		bool fluid;		//if cell is fluid it's true
 		bool source;	//if cell is a boundary condition it is true
 		bool boundary;	//if cell lays on X=0 or X=N-1 or Y=0 or Y=M-1 it's true
+		bool outlet;
 
 		int x;	//X-coordinate of the cell
 		int y;	//Y-coordinate of the cell
@@ -67,6 +68,7 @@ class Cell
 		bool GetBoundary();
 		bool GetSource();
 		bool GetBalance();
+		bool GetOutlet();
 		/*double GetInputTop();
 		double GetInputRight();
 		double GetInputBottom();
@@ -76,6 +78,7 @@ class Cell
 		int GetX();
 		int GetY();
 		void SetSource();
+		void SetOutlet();
 
 		//void SetNeighbours(map<string, Cell*> neighbours);
 		void SetNeighbours(Cell* top, Cell* right, Cell* bottom, Cell* left);

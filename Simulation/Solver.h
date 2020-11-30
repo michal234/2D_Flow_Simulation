@@ -33,6 +33,6 @@ class Solver
 		bool GetBoudaryConditions();
 		void CellGridInitialization(BinaryMap bm);
 		void SetBoundaryConditions(double v);
-		void Simulate();
+		vector<Cell> Simulate();
 };
 

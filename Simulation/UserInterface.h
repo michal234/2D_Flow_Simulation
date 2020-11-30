@@ -4,6 +4,7 @@
 #include "BinaryMap.h"
 #include "Cell.h"
 #include "Solver.h"
+#include "Results.h"
 
 using namespace std;
 
@@ -12,6 +13,7 @@ class UserInterface
 	private:
 		BinaryMap bm;
 		Solver solver;
+		Results results;
 
 		void ReadImage();
 		void ShowImage();
@@ -21,6 +23,7 @@ class UserInterface
 		void SolverSimulation();
 		void SetBoundaryConditions();
 		void CloseSolver();
+		void ShowResults();
 
 	public:
 		UserInterface();

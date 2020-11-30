@@ -18,7 +18,7 @@ Cell::Cell()
 
 	x = y = 0;
 
-	fluid = source = boundary = false;
+	fluid = source = boundary = outlet = false;
 }
 
 Cell::Cell(bool fluid)
@@ -41,7 +41,7 @@ Cell::Cell(bool fluid)
 
 	x = y = 0;
 
-	source = boundary = false;
+	source = boundary = outlet = false;
 }
 
 Cell::Cell(bool fluid, bool boundary, int x, int y)
@@ -65,7 +65,7 @@ Cell::Cell(bool fluid, bool boundary, int x, int y)
 	typeOfNeighbourhood = 0;
 	typeOfNeighbourhoodOnSlant = 0;
 
-	source = false;
+	source = outlet = false;
 }
 
 bool Cell::GetFluid()
@@ -88,6 +88,11 @@ bool Cell::GetBalance()
 	if( abs(input_total - output_total) < 1e-5 )
 		return true;
 	return false;
+}
+
+bool Cell::GetOutlet()
+{
+	return outlet;
 }
 
 double Cell::GetFluidAmount()
@@ -113,6 +118,11 @@ int Cell::GetY()
 void Cell::SetSource()
 {
 	source = true;
+}
+
+void Cell::SetOutlet()
+{
+	outlet = true;
 }
 
 void Cell::SetNeighbours(Cell* top, Cell* right, Cell* bottom, Cell* left)
@@ -1931,4 +1941,5 @@ void Cell::StandarizeCell(double factor)
 	input_right_next *= factor;
 	input_top_next *= factor;
 	fluid_amount *= factor;
+	velocity *= factor;
 }

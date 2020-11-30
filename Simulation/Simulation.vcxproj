@@ -156,6 +156,7 @@
   <ItemGroup>
     <ClCompile Include="BinaryMap.cpp" />
     <ClCompile Include="Cell.cpp" />
+    <ClCompile Include="Results.cpp" />
     <ClCompile Include="Simulation.cpp" />
     <ClCompile Include="Solver.cpp" />
     <ClCompile Include="UserInterface.cpp" />
@@ -164,6 +165,7 @@
     <ClInclude Include="BinaryMap.h" />
     <ClInclude Include="Cell.h" />
     <ClInclude Include="Headers.h" />
+    <ClInclude Include="Results.h" />
     <ClInclude Include="Solver.h" />
     <ClInclude Include="UserInterface.h" />
   </ItemGroup>

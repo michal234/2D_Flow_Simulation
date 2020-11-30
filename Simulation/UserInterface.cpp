@@ -13,7 +13,8 @@ void UserInterface::ShowInterface()
 	cout << "1 - wczytaj obraz\n";
 	cout << "2 - wyswietl obraz\n";
 	cout << "3 - otworz solver\n";
-	cout << "4 - zakoncz dzialanie programu\n";
+	cout << "4 - wyniki\n";
+	cout << "5 - zakoncz dzialanie programu\n";
 	cout << ">>";
 }
 
@@ -36,6 +37,9 @@ int UserInterface::ChooseService(int choice)
 			OpenSolver();
 			return 2;
 		case 4:
+			ShowResults();
+			break;
+		case 5:
 			CloseInterface();
 			return 0;
 		default:
@@ -140,11 +144,15 @@ void UserInterface::SolverSimulation()
 		return;
 	}
 	//tu robimy symulacjê
-	solver.Simulate();
-
+	results = Results(solver.Simulate(), bm.GetRows(), bm.GetCols());
 }
 
 void UserInterface::CloseSolver()
 {
 	cout << "Solver zostal zamkniety\n";
+}
+
+void UserInterface::ShowResults()
+{
+	results.ShowVelocityContour();
 }

@@ -12,6 +12,7 @@ BinaryMap::BinaryMap()
 BinaryMap::BinaryMap(const string path)
 {
 	Mat img = imread(path);
+	//cout << img.type() << endl;
 	if( img.channels() > 1 )
 		input = ConvertToOneChannel(img);
 	else
