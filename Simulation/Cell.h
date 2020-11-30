@@ -11,6 +11,7 @@ class Cell
 		bool source;	//if cell is a boundary condition it is true
 		bool boundary;	//if cell lays on X=0 or X=N-1 or Y=0 or Y=M-1 it's true
 		bool outlet;
+		bool outer_boundary;
 
 		int x;	//X-coordinate of the cell
 		int y;	//Y-coordinate of the cell

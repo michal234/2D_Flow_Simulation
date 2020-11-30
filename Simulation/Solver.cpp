@@ -126,9 +126,9 @@ vector<Cell> Solver::Simulate()
 		}
 		//Standarization();
 		UpdateGrid();
-		//ShowStep();
-		/*cout << endl<< "Liczba komorek niezbilansowanych: " << unbalancedCells << endl;
-		cout << endl << endl;*/
+		ShowStep();
+		cout << endl<< "Liczba komorek niezbilansowanych: " << unbalancedCells << endl;
+		cout << endl << endl;
 		if( outlet )
 			x++;
 		
@@ -436,8 +436,8 @@ void Solver::ShowStep()
 			//if( CellGrid[i][j].GetFluid() )
 				//cout << CellGrid[i][j].GetFluidAmount() << " ";
 				//cout << CellGrid[i*cellGridCols+j].GetFluidAmount() << " ";
-				//printf("%.0f ", CellGrid[i * cellGridCols + j].GetFluidAmount() );
-				printf("%.1f ", CellGrid[i * cellGridCols + j].GetVelocity());
+				printf("%.0f ", CellGrid[i * cellGridCols + j].GetFluidAmount() );
+				//printf("%.0f ", CellGrid[i * cellGridCols + j].GetVelocity());
 			else
 				cout << "  ";
 		}
