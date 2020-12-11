@@ -137,9 +137,10 @@ vector<Cell> Solver::Simulate()
 
 	cout << "Symulacja zakonczona\n";
 
-	Standarization();
+	//Standarization();
 	//UpdateGrid();
-	//ShowStep();
+	RemoveExtremalPoints();
+	ShowStep();
 	return CellGrid;
 }
 
@@ -154,7 +155,7 @@ void Solver::SetNeighbours()
 		int y = cell->GetY();
 		//map<string, Cell*> neighbours = map<string, Cell*>();
 
-		Cell outer = Cell(true);	//default fluid cell for cells on the boundary
+		Cell outer = Cell(true, true);	//default fluid cell for cells on the boundary
 
 		Cell* top;
 		Cell* right;
@@ -437,7 +438,7 @@ void Solver::ShowStep()
 				//cout << CellGrid[i][j].GetFluidAmount() << " ";
 				//cout << CellGrid[i*cellGridCols+j].GetFluidAmount() << " ";
 				//printf("%.0f ", CellGrid[i * cellGridCols + j].GetFluidAmount() );
-				printf("%.0f ", CellGrid[i * cellGridCols + j].GetVelocity());
+				printf("%.0f  ", CellGrid[i * cellGridCols + j].GetVelocity());
 			else
 				cout << "  ";
 		}
@@ -467,4 +468,39 @@ void Solver::Standarization()
 		}
 	}
 
+}
+
+void Solver::RemoveExtremalPoints()
+{
+	double sum = 0.0;
+	double mean = 0.0;
+	double sigma = 0.0;
+	int nExtremal = 1;
+
+	for (int i = 0; i < FluidCells.size(); i++)
+		sum += FluidCells[i]->GetVelocity();
+
+	mean = sum / FluidCells.size();
+	sum = 0.0;
+
+	for (int i = 0; i < FluidCells.size(); i++)
+	{
+		double temp = ( FluidCells[i]->GetVelocity() - mean ) * ( FluidCells[i]->GetVelocity() - mean );
+		sum += temp;
+	}
+
+	sigma = sqrt( sum / (double)FluidCells.size() );
+
+	while (nExtremal != 0)
+	{
+		nExtremal = 0;
+		for (int i = 0; i < FluidCells.size(); i++)
+		{
+			if (FluidCells[i]->GetVelocity() > mean + 2 * sigma)
+			{
+				nExtremal++;
+				FluidCells[i]->GetMeanFromNeighbours();
+			}
+		}
+	}
 }

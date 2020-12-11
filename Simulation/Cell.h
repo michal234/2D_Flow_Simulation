@@ -63,13 +63,14 @@ class Cell
 
 	public:
 		Cell();
-		Cell(bool fluid);	//for usage of setting neighbours in solver
+		Cell(bool fluid, bool outer);	//for usage of setting neighbours in solver
 		Cell(bool fluid, bool boundary, int x, int y);
 		bool GetFluid();
 		bool GetBoundary();
 		bool GetSource();
 		bool GetBalance();
 		bool GetOutlet();
+		bool GetOuterBoundary();
 		/*double GetInputTop();
 		double GetInputRight();
 		double GetInputBottom();
@@ -98,5 +99,7 @@ class Cell
 
 		void Update();
 		void StandarizeCell(double factor);
+
+		void GetMeanFromNeighbours();
 };
 

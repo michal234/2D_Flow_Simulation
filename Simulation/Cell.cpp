@@ -18,12 +18,13 @@ Cell::Cell()
 
 	x = y = 0;
 
-	fluid = source = boundary = outlet = false;
+	fluid = source = boundary = outlet = outer_boundary = false;
 }
 
-Cell::Cell(bool fluid)
+Cell::Cell(bool fluid, bool outer)
 {
 	this->fluid = fluid;
+	this->outer_boundary = outer;
 
 	input_top = input_right = input_bottom = input_left = 0.0;
 	input_top_next = input_right_next = input_bottom_next = input_left_next = 0.0;
@@ -65,7 +66,7 @@ Cell::Cell(bool fluid, bool boundary, int x, int y)
 	typeOfNeighbourhood = 0;
 	typeOfNeighbourhoodOnSlant = 0;
 
-	source = outlet = false;
+	source = outlet = outer_boundary = false;
 }
 
 bool Cell::GetFluid()
@@ -93,6 +94,11 @@ bool Cell::GetBalance()
 bool Cell::GetOutlet()
 {
 	return outlet;
+}
+
+bool Cell::GetOuterBoundary()
+{
+	return outer_boundary;
 }
 
 double Cell::GetFluidAmount()
@@ -176,7 +182,7 @@ void Cell::FluidFlow()
 
 	if (abs(x_direction) < 1e-5 && abs(y_direction) < 1e-5 )
 	{
-		//UniformFlow();
+		UniformFlow();
 		return;
 	}
 	
@@ -1386,15 +1392,16 @@ void Cell::FluidFlow()
 				left_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 			if (y_direction > 0)
 			{
-				if( abs(x_direction) < 1e-5 )
+				bottom_flow = 0.5 * input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+				if( abs(x_direction) < 1e-5) 
 				{
-					right_flow += input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * 0.5;
-					left_flow += input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * 0.5;
+					right_flow += bottom_flow / 2;
+					left_flow += bottom_flow / 2;
 				}
 				else if( x_direction > 0 )
-					right_flow += input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					right_flow += bottom_flow;
 				else
-					left_flow += input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					left_flow += bottom_flow;
 			}
 			else
 				bottom_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
@@ -1408,15 +1415,16 @@ void Cell::FluidFlow()
 				bottom_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
 			if (x_direction > 0)
 			{
-				if (abs(y_direction) < 1e-5)
+				left_flow = 0.5 * input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
+				if( abs(y_direction) < 1e-5 )
 				{
-					top_flow += input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * 0.5;
-					bottom_flow += input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * 0.5;
+					top_flow += left_flow / 2;
+					bottom_flow += left_flow / 2;
 				}
 				else if( y_direction > 0 )
-					top_flow += input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
+					top_flow += left_flow;
 				else
-					bottom_flow += input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
+					bottom_flow += left_flow;
 			}
 			else
 				left_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
@@ -1430,15 +1438,16 @@ void Cell::FluidFlow()
 				left_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 			if (y_direction < 0)
 			{
+				top_flow = 0.5 * input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
 				if( abs(x_direction) < 1e-5 )
 				{
-					right_flow += input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * 0.5;
-					left_flow += input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * 0.5;
+					right_flow += top_flow / 2;
+					left_flow += top_flow / 2;
 				}
-				else if( x_direction > 0 )
-					right_flow += input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+				else if (x_direction > 0)
+					right_flow += top_flow;
 				else
-					left_flow += input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
+					left_flow += top_flow;
 			}
 			else
 				top_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
@@ -1452,15 +1461,16 @@ void Cell::FluidFlow()
 				bottom_flow = input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction));
 			if (x_direction < 0)
 			{
+				right_flow = 0.5 * input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
 				if( abs(y_direction) < 1e-5 )
 				{
-					top_flow += input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * 0.5;
-					bottom_flow += input_total * abs(y_direction) / (abs(x_direction) + abs(y_direction)) * 0.5;
+					top_flow += right_flow / 2;
+					bottom_flow += right_flow / 2;
 				}
-				else if( y_direction > 0 )
-					top_flow += input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
+				else if (y_direction > 0)
+					top_flow += right_flow;
 				else
-					bottom_flow += input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
+					bottom_flow += right_flow;
 			}
 			else
 				right_flow = input_total * abs(x_direction) / (abs(x_direction) + abs(y_direction));
@@ -1994,4 +2004,56 @@ void Cell::StandarizeCell(double factor)
 	input_top_next *= factor;
 	fluid_amount *= factor;
 	velocity *= factor;
+}
+
+void Cell::GetMeanFromNeighbours()
+{
+	double sum = 0.0;
+	double mean = 0.0;
+	int nNeighbours = 0;
+
+	if (neighbours["Top"]->GetFluid() && !neighbours["Top"]->GetOuterBoundary())
+	{
+		sum += neighbours["Top"]->GetVelocity();
+		nNeighbours++;
+	}
+	if (neighbours["Right"]->GetFluid() && !neighbours["Right"]->GetOuterBoundary())
+	{
+		sum += neighbours["Right"]->GetVelocity();
+		nNeighbours++;
+	}
+	if (neighbours["Bottom"]->GetFluid() && !neighbours["Bottom"]->GetOuterBoundary())
+	{
+		sum += neighbours["Bottom"]->GetVelocity();
+		nNeighbours++;
+	}
+	if (neighbours["Left"]->GetFluid() && !neighbours["Left"]->GetOuterBoundary())
+	{
+		sum += neighbours["Left"]->GetVelocity();
+		nNeighbours++;
+	}
+	if (neighboursOnSlant["TopRight"]->GetFluid() && !neighboursOnSlant["TopRight"]->GetOuterBoundary())
+	{
+		sum += neighboursOnSlant["TopRight"]->GetVelocity();
+		nNeighbours++;
+	}
+	if (neighboursOnSlant["BottomRight"]->GetFluid() && !neighboursOnSlant["BottomRight"]->GetOuterBoundary())
+	{
+		sum += neighboursOnSlant["BottomRight"]->GetVelocity();
+		nNeighbours++;
+	}
+	if (neighboursOnSlant["BottomLeft"]->GetFluid() && !neighboursOnSlant["BottomLeft"]->GetOuterBoundary())
+	{
+		sum += neighboursOnSlant["BottomLeft"]->GetVelocity();
+		nNeighbours++;
+	}
+	if (neighboursOnSlant["TopLeft"]->GetFluid() && !neighboursOnSlant["TopLeft"]->GetOuterBoundary())
+	{
+		sum += neighboursOnSlant["TopLeft"]->GetVelocity();
+		nNeighbours++;
+	}
+
+	mean = sum / nNeighbours;
+
+	velocity = mean;
 }

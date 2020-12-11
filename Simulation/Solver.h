@@ -26,6 +26,7 @@ class Solver
 
 		void ShowStep();
 		void Standarization();
+		void RemoveExtremalPoints();
 
 	public:
 		Solver();
